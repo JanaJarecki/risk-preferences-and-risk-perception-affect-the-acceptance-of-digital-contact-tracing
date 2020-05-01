@@ -1,0 +1,317 @@
+---
+title             : "BCRQ - Basel Covid Risk Questionnaire"
+description: | 
+  Preregistration of Primary Data Analysis
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+email: "jana.jarecki@unibas.ch"
+
+author:
+  - name: "Rebecca Albrecht"
+    affiliation: "University of Basel"
+    url: "https://psychologie.unibas.ch/de"
+  - name: "Dr. Jana B. Jarecki"
+    affiliation: "University of Basel"
+    affiliation_url : https://psychologie.unibas.ch/de/ep/
+    url: "https://psychologie.unibas.ch/de/personen/jana-jarecki/about-me/"
+  - name: "Jörg Rieskamp"
+    affiliation: "University of Basel"
+    affiliation_url : https://psychologie.unibas.ch/de/ep/
+    url: "https://psychologie.unibas.ch/de/personen/jana-jarecki/about-me/"
+
+output:
+  # tint::tintPdf:
+  #   highlight: kate
+  #   latex_engine: xelatex
+  distill::distill_article:
+    toc         : true
+    toc_depth   : 1
+    css         : "style.css"
+latexfonts: 
+  - package: sourceserifpro
+    options: default
+header-includes:
+   - \usepackage{underscore}
+   - \usepackage{url}
+   - \let\subsubsection\subsection
+---
+
+
+<!-- To keep pre-registrations to a reasonable length for readers, we recommend answers fit within a single page .pdf document, roughly 3200 characters. Read more about this here: https://aspredicted.org/messages/why_limits.php -->
+
+
+## Existing data
+**No**, no data have been collected for this study yet.
+
+## Main Hypothesis
+We test three hypotheses:
+- H1:
+- H2:
+- H3:
+
+
+## Dependent Variables 
+The dependent variables will be attitudes towards and compliance with DHDs.
+
+::: l-body-outset
+
+Variable    Description
+---------   ---------------------------------------------
+PARTS1YR_S    The total number of opposite-sex partners
+             in the last 12 months (PARTS1YR) in
+              relation to the baseline sexual activity
+              (variable is transformed,
+              see the section [Variable Transformation](#variable-transformation)).
+ANYPRGHP     (binary variable) If the respondent or the
+             respondent’s partner have received medical
+             fertility assistance to aid with pregnancy
+             (INFEVER variable name for males).
+CURRPRTS_S   The current total number of sexual partners 
+             not including respondents spouse or the 
+             cohabiting partner (CURRPRTS) in relation 
+             to the age-cohort (variable is transformed,
+             see the section [Variable Transformation](#variable-transformation)).
+EVWNTANO     (binary variable) If the respondent has
+             ever considered adoption
+             (only available for female respondents).
+
+:::
+
+### Independent Variables
+
+::: l-body-outset
+
+Variable    Transformation        Description
+---------   --------------------  --------------------------------------------
+ADDEXP      --                    The number of future (additional)
+                                  childbirths expected by the respondent (with
+                                  missing values [imputed by the NSFG](https://www.cdc.gov/nchs/data/nsfg/NSFG_2015_2017_UserGuide_MainText.pdf#page=34 . pg19));
+AGE_R       --                    Respondents reported age in years at the
+                                  time of the interview.
+GENDER      --                    Male or female as reported by the respondent.
+
+:::
+
+### Control Variables
+
+The following variables are expected to influence reproductive risk taking.
+
+::: l-body-outset
+
+Variable    Transformation        Description
+---------   --------------------  -------------------------------------------
+CURRPREG    --                    If the respondent is currently pregnant.
+HADSEX      --                    Respondent’s sexual status (whether they
+                                  are sexually active or not). 
+RSTRSTAT    --                     Respondent's sterility status at the time
+                                     of the interview.
+RELCURR     --                    Respondents’ religious status and type.
+RELDLIFE    --                    Respondents’ extent of religious affiliation.
+LIFPRTNR_S  based on LIFPRTNR      Baseline sexual activity: sum of
+                                   opposite-sex partners in respondents’
+                                  life (LIFPRTNR) in relation to the age
+                                  cohort (variable is transformed, see the
+                                  section [Variable Transformation](#variable-transformation)).
+SEXPY_S     based on LIFPRTNR,    Amount of sexual partners
+            AGE_R, AGEFSTSX       per age cohort (variable is transformed, see 
+                                  the section [Variable Transformation](#variable-transformation)).
+
+:::
+
+### Additional variables used as basis for the variable transformation
+
+The following variables are used for variable transformation and variable standardization.
+
+Variable      Description        
+---------     --------------------
+AGEFSTSX      Respondent’s age at first sex.
+LIFPRTNR      Respondent’s total number of sexual partners in their lifetime.
+CURRPRTS      Current total number of sexual partners not including the respondent’s spouse or cohabiting partner.
+PARTS1YR      Total number of opposite-sex partners in the last 12 months. 
+
+
+### Sample weights and design variables
+
+::: l-body-outset
+
+Variable      Description        
+---------     --------------------
+WGT2015-2017  Weight variable, accounts for over- and undersampling of
+              demographic characteristics, relative to the general population.
+SEST          Design variable. This is a method of variance reduction that
+              estimates the general population statistics (computational sample stratum).
+SECU          Design variable. Accounts for data falling into potential groups
+             (data clusters).  
+
+:::
+
+
+
+
+### Variable Transformation
+Since there are recognized age-cohort differences in sexual activity (e.g., Herbenick et a.l, 2010), we will standardize the reproductive risk-taking variables within age brackets. The variables listed below will be transformed to account for  differences in the baseline sexual behavior between age cohorts. The age cohorts we use are 18-19; 20-24; 25-29; 30-39; 40-49 years of age (Herbenick et a.l, 2010).
+
+LIFPRTNR_S is based on the within-cohort  z-standardized variable LIFPRTNR.
+
+PARTS1YR_S is based on the within-cohort  z-standardized variable PARTS1YR.
+
+CURRPRTS_S is based on the within-cohort  z-standardized variable CURRPRTS.
+
+SEXPY_S is based on the within-cohort z-standardized variable SEXPY, which itself is a computed variable that measures the baseline risky sexual behavior, which we define as the respondent's number of sexual partners per year of sexual activity, see Equation \@ref(eq:sexpy): 
+
+$$
+\text{SEXPY} = \frac{LIFPRTNR}{ \text{AGE_R} - \text{AGEFSTSX} + 1 }
+(\#eq:sexpy)
+$$
+
+where _LIFPRTNR_ = total number of sexual partners in lifetime, _AGE_R_ = current age, _AGEFSTSX_ = age of first sex.
+
+
+### Data inclusion or exclusion
+
+We include women and men who are sexually active, fertile, cohabiting or married or not, and are between 18 and 50 years old. We exclude those respondents who are under the age of 18 (_n_ = 1,057), who are surgically or non surgically sterile (_n_ = 1,462) in addition to those who have never been sexually active (_n_ = 1,490).  The sterile female respondents will be included in the exploratory hypotheses about consideration of adoption (H1.4). 
+
+
+### Outlier Removal
+
+For the initial analyses, no outliers will be removed. We will run a robustness check for the results after, removing participants who deviate from the sample mean by more than 3 standard deviations, regarding the total number of partners in a lifetime (_LIFPRTNR_S_), frequency of sexual intercourse (_SEXPY_S_), and total expectancy for children (_ADDEXP_). Outliers will be determined and removed using the z-score method (_M_ +/- 3 x _SD_).
+
+
+### Data weighting
+
+As the data provided by the NSF is not a perfect representation of the U.S. American population, the NSFG recommends the use of the weight variable (_WGT2015_2017_) in combination with two design variables (_SEST_ and _SECU_) to make inferences regarding the whole U.S. population (Hyattsville, Maryland, 2015-2017). We will add these variables to the analyses as a further robustness check.
+
+
+# Sample Description 
+
+The sample size before exclusion equals _N_ = 10,094, and _N_ = 6,915, is the sample that we will use, which includes 3,601 women (1,953 excluded) and 3,314 me (1,226) excluded.
+
+## Sample Type
+
+The data contains missing values in the dependent variable about pregnancy assistance (ANYPRGHP), which is compensated by using its [imputed](https://www.cdc.gov/nchs/data/nsfg/NSFG_2015_2017_UserGuide_MainText.pdf#page=34 . pg19) form; in addition there are missings in the adoption intention (EVWNTANO) as this question was not provided to male participants, and in some control variables CURRPREG, RELDLIFE). For these cases, we use list-wise deletion in the corresponding analysis.
+
+
+## Study End Point:
+
+Because this is a secondary data analysis, we will only consult the data mentioned in this documentation. Our study will end after our analysis and robustness checks.  
+
+
+# Data Analysis Plan and R-Code
+
+Statistical analyses will be conducted in the statistical framework system R version 3.6.1 (R Core Team, 2019) using Bayesian linear regression models, implemented in the brms R package, version 2.10.0 (Bürkner, 2017, 2018).
+
+No follow-up analysis after the study endpoint.
+
+## Model Specification
+
+Bayesian models will be used to test our hypotheses about the relationship between childbearing expectancy, age, gender, and risk-taking.
+
+### Priors
+
+We use  normal (0,10) priors and cauchy priors (0, 2.5), for the coefficients in models of the normal and Benoulli family (respectively).
+
+### R-Code
+The R-code for model fitting is provided
+
+```{r, echo=FALSE}
+sourcecode <- paste(readLines("../analysis/code/2. fit models.R"), collapse="\n")
+```
+```{r, models, eval=FALSE, echo=TRUE, code = sourcecode}
+```
+
+
+
+
+## Inferential Criteria
+
+In the regression analyses, the statistics reported will be 89% and 95% **highest-density intervals** of the estimated regression coefficients and **Bayes Factors** (potentially as natural logarithms), which describe the amount of relative evidence of a model that has a non-zero regression term over a model with zero regression term (Dienes, 2014). Bayes Factors > 3 (&lt; ⅓) are considered substantial support for (against) a model (Dienes, 2014). Additionally, **Bayesian R<sup>2</sup>** will be reported, describing the proportion of variance in the dependent variable (risk-taking) explained by the regressors (Dienes, 2014). Post-hoc tests of the direction of the regression coefficients will be conducted and the statistic reported will be the **evidence strength/Bayes Factor** quantifying the posterior probability of a (directed) hypothesis against its alternative; and values > 3 (&lt; ⅓) are considered substantial evidence strength for (against) a hypothesis.
+
+
+### Rules to Accept or Reject the Main and Exploratory Hypotheses
+
+_H1._ The main hypothesis is about risk-taking behavior in women (three dependent risk-taking variables, H1.1, H1.2, H1.3). For each dependent variable, H1 will be accepted if there is a substantial positive two-way interaction of age and reproductive goal (AGE_R x ADDEXP) in the female sub-group (which may also take the form of a three-way interaction with gender, if the two-way interaction in the female sub-group is substantial), and if additionally the Bayes-Factor-based model comparison supports the complexity of this regression specification. The exploratory/auxiliary hypothesis (H1.4) will be accepted if the model comparison supports a model with a two-way interaction (AGE_R x ADDEXP), and if the coefficient of this interaction is positive.
+
+_H2._ The exploratory hypothesis about the gender difference in the influence of age and reproductive goals on risk taking (with three dependent variables H2.1, H2.2, H2.3) will be accepted for each dependent variable, if the Bayes Factor analysis supports a model that includes the three-way interaction (AGE_R x ADDEXP x GENDER) and if the post-hoc analysis shows substantial evidence for that the interaction of age and reproductive need (AGE_R x ADDEXP) is more positive for the female sub-group compared to the male sub-group.
+
+_H3._ The exploratory hypothesis about the null effect of age on risk-taking in men (H3.1, H3.2, H3.3) will be accepted if in the male sub-group there is no substantial main effect of age on reproductive risk-taking (AGE_R) and a substantial positive main effect of need (ADDEXP) and no substantial positive interaction of need with age (AGE_R x ADDEXP).
+
+
+## Sensitivity Test
+
+To account for under- and oversampling, in relation to the general U.S. population, we will repeat the aforementioned analysis in a weighted regression (using the variable WGT2015_2017).
+
+## Addressing Statistical Issues
+
+If the models fail to converge we will reduce the number of control variables to simplify the model.
+
+In the case of the data not being normally distributed we will use appropriate transformations. 
+
+<!-- Footnotes themselves at the bottom. -->
+
+
+## Notes
+
+[^1]:
+     Biological gender assigned at birth. 
+
+[^2]:
+     One’s natural ability to reproduce. 
+
+
+<!-- Docs to Markdown version 1.0β22 -->
+
+
+
+
+
+
+
+\newpage
+
+# References
+
+<div style = "padding-left: 0.7cm ; text-indent: -0.7cm ;">
+
+\setlength{\parindent}{-0.7cm}
+\urlstyle{same}
+\leftskip 0.7cm
+\setlength{\parskip}{\baselineskip}
+
+ASMR, (2012). Age and Fertility a guide for patients. American Society for Reproductive Medicine [PDF booklet] Available at: https://www.reproductivefacts.org/globalassets/rf/news-and-publications/bookletsfact-sheets/english-fact-sheets-and-info-booklets/Age_and_Fertility.pdf
+
+Barr, D. J. (2013). Random effects structure for testing interactions in linear mixed-effects models. Frontiers in Psychology, 4. https://doi.org/10.3389/fpsyg.2013.00328
+
+Dienes, Z. (2014). Using Bayes to get the most out of non-significant results. Frontiers in Psychology, 5. https://doi.org/10.3389/fpsyg.2014.00781
+
+Dutilh, G., Sarafoglou, A., & Wagenmakers, E.-J. (2019). Flexible yet fair: blinding analyses in experimental psychology. Synthese. https://doi.org/10.1007/s11229-019-02456-7
+
+FONCSI, (2019). Risk, Uncertainty and decision making. Fondation our une culture de sècuritè industrielle.  [online] Available at: https://www.foncsi.org/en/research/research-themes/risk-uncertainty-decision-makig
+
+Herbenick, D., Reece, M., Schick, V., Sanders, S. A., Dodge, B., & Fortenberry, J. D. (2010). Sexual behavior in the United States: Results from a national probability sample of men and women ages 14-94. The Journal of Sexual Medicine, 7 Suppl 5, 255–265. https://doi.org/10.1111/j.1743-6109.2010.02012.x
+
+Houston, A. and McNamara, J. (1985). The choice of two prey types that minimize the probability of starvation. Behavioral Ecology and Sociobiology [online] 17: 135–141.Google Scholar
+
+Houston, A. I., & McNamara, J. M. (1988). A framework for the functional analysis of behaviour. Behavioural and Brain Science, 11, 117–163. (https://doi.org/10.1017/S0140525X00053061)
+
+McNamara, J. M., & Houston, A. I. (1986). The Common Currency for Behavioral Decisions. The American Naturalist, 127(3), 358–378. (https://doi.org/10.1086/284489)
+
+NHS (2018, accessed 2020, April 23) Retrieved from https://www.nhs.uk/conditions/menopause/
+
+Hyattsville, Maryland, (2015-2017) User guide-Appendix 7-Restricted-Use Analytic Variables. National Survey of Family Growth. Centers for Disease Control and Prevention. The National Center for Health Statistics. U.S. Department of health and human services [online PDF] https://www.cdc.gov/nchs/data/nsfg/NSFG_2015-2017_UG_App7a_RestrictedUseRDCvars_FemResp_Preg.pdf
+
+Hyattsville, Maryland, (2018) Users Guide. National Survey of Family Growth. Centers for Disease Control and Prevention. The National Center for Health Statistics. U.S. Department of health and human services [online PDF] https://www.cdc.gov/nchs/data/nsfg/NSFG_2015_2017_UserGuide_MainText.pdf
+
+Kacelnik, A., & Bateson, M. (1997). Risk-sensitivity: Crossroads for theories of decision-making. Trends in Cognitive Sciences, 1(8), 304–309. https://doi.org/10.1016/S1364-6613(97)01093-0
+
+Killianova, T. (2013). Risky Behavior. In M. D. Gellman & J. R. Turner (Eds.), Encyclopedia of Behavioral Medicine (pp. 1692–1693). https://doi.org/10.1007/978-1-4419-1005-9_1551
+
+Miller, J. H., Weinberg, R. K., Canino, N. L., Klein, N. A., & Soules, M. R. (1999). The pattern of infertility diagnoses in women of advanced reproductive age. American Journal of Obstetrics and Gynecology, 181(4), 952–957. https://doi.org/10.1016/s0002-9378(99)70331-5
+
+R Core Team (2019). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria.  [online] Available at: https://www.R-project.org/.
+
+Rolf, C., & Nieschlag, E. (2001). Reproductive functions, fertility and genetic risks of aging men. Experimental and Clinical Endocrinology & Diabetes, 109(2), 68–74. https://doi.org/10.1055/s-2001-14825
+
+The National Survey of Family Growth, (2002).Survey Description. Center for Medicare and Medicaid service.gov [online] Available at: https://www.cms.gov/About-CMS/Agency-Information/OMH/resource-center/hcps-and-researchers/data-tools/sgm-clearinghouse/nsfg.html
+
+The National Survey of Family Growth, (2015). Sample Design & Documentation. Centers for Disease Control and Prevention. [PDF] Available at: https://www.cdc.gov/nchs/data/nsfg/NSFG_2013-2015_Sample_Design_Documentation.pdf
+
+</div>
