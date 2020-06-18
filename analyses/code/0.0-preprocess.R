@@ -31,6 +31,8 @@ d <- d[, !drop, with = FALSE]
 # rename id variable
 setnames(d, c("responseid", "duration (in seconds)"), c("id", "duration_seconds"))
 setcolorder(d, "id")
+# spelling error in wealth variable names
+setnames(d, gsub("wealtch", "wealth", names(d)))
 
 # Make dependent variables ----------------------------------------------------
 # accept_index & comply_index
