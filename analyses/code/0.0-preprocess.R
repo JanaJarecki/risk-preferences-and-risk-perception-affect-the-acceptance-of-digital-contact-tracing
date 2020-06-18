@@ -41,12 +41,9 @@ d[, comply_index := rowMeans(.SD), .SDcols = grep("^com_", colnames(d))]
 # Make independent variables --------------------------------------------------
 # mhealth_index
 d[, mhealth_index := rowMeans(.SD), .SDcols = grep("^mhealth_", colnames(d))]
-d[, iwah_ref := rowMeans(.SD), .SDcols = grep("^iwah_ref", colnames(d))]
-d[, iwah_common := rowMeans(.SD), .SDcols = grep("^iwah_common", colnames(d))]
-d[, iwah_care     := rowMeans(.SD), .SDcols = grep("^iwah_care", colnames(d))]
-d[, iwah_responsibility := rowMeans(.SD), .SDcols = grep("^iwah_res", colnames(d))]
-d[, iwah_loyalty := rowMeans(.SD), .SDcols = grep("^iwah_loya", colnames(d))]
-d[, iwah_help := rowMeans(.SD), .SDcols = grep("^iwah_hel", colnames(d))]
+d[, iwah_community := rowMeans(.SD), .SDcols = grep("^iwah_.*_1", colnames(d))]
+d[, iwah_swiss := rowMeans(.SD), .SDcols = grep("^iwah_.*_2", colnames(d))]
+d[, iwah_world := rowMeans(.SD), .SDcols = grep("^iwah_.*_3", colnames(d))]
 d[, svo_index := rowMeans(.SD), .SDcols = grep("^svo_", colnames(d))]
 
 # Delete the columns that were used to create the variables ------------------
