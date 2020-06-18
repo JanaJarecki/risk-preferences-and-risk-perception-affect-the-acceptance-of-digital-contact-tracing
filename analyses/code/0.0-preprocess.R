@@ -34,17 +34,21 @@ setcolorder(d, "id")
 
 # Make dependent variables ----------------------------------------------------
 # accept_index & comply_index
-d[, accept_index := rowMeans(.SD), .SDcols = grep("^acc_", colnames(d))]
-d[, comply_index := rowMeans(.SD), .SDcols = grep("^com_", colnames(d))]
+# .SDcols = patterns():
+#            makes a Sub Dataframe (.SD) from columns matching the pattern
+#        :=
+#            is like <- but inside a data.table
+d[, accept_index := rowMeans(.SD), .SDcols = patterns("^acc_")]
+d[, comply_index := rowMeans(.SD), .SDcols = patterns("^com_")]
 
 
 # Make independent variables --------------------------------------------------
 # mhealth_index
-d[, mhealth_index := rowMeans(.SD), .SDcols = grep("^mhealth_", colnames(d))]
-d[, iwah_community := rowMeans(.SD), .SDcols = grep("^iwah_.*_1", colnames(d))]
-d[, iwah_swiss := rowMeans(.SD), .SDcols = grep("^iwah_.*_2", colnames(d))]
-d[, iwah_world := rowMeans(.SD), .SDcols = grep("^iwah_.*_3", colnames(d))]
-d[, svo_index := rowMeans(.SD), .SDcols = grep("^svo_", colnames(d))]
+d[, mhealth_index := rowMeans(.SD), .SDcols = patterns("^mhealth_")]
+d[, iwah_community := rowMeans(.SD), .SDcols = patterns("^iwah_.*_1")]
+d[, iwah_swiss := rowMeans(.SD), .SDcols = patterns("^iwah_.*_2")]
+d[, iwah_world := rowMeans(.SD), .SDcols = patterns("^iwah_.*_3")]
+d[, svo_index := rowMeans(.SD), .SDcols = patterns("^svo_")]
 
 # Delete the columns that were used to create the variables ------------------
 drop <- grep("^mhealth_|^iwah_|^svo_|^acc_|^com_", colnames(d)[1:100], value=T)
