@@ -83,7 +83,7 @@ corrplot.mixed(data = d[, .SD, .SDcols = patterns("^tech|accept_index")])
 ```
 
 ## Compliance - Acceptance
-```{r tech-acceptance}
+```{r com-acceptance}
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^comply_index|accept_index")])
 ```
 
@@ -98,7 +98,7 @@ corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding")])
 ```
 
 ## Understanding - Acceptance and Complicance
-```{r tech-acceptance}
+```{r under-acceptance}
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|accept_index|comply_index")])
 ```
 
