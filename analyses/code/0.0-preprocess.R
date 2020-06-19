@@ -52,6 +52,9 @@ d[, iwah_swiss := rowMeans(.SD), .SDcols = patterns("^iwah_.*_2")]
 d[, iwah_world := rowMeans(.SD), .SDcols = patterns("^iwah_.*_3")]
 d[, svo_index := rowMeans(.SD), .SDcols = patterns("^svo_")]
 
+d$understanding_self = 6-d$understanding_self 
+d[, understanding_correct := rowMeans(.SD), .SDcols = patterns("^understanding_")]
+
 # Delete the columns that were used to create the variables ------------------
 drop <- grep("^mhealth_|^iwah_|^svo_|^acc_|^com_", colnames(d)[1:100], value=T)
 d <- d[, !drop, with = FALSE]
