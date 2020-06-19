@@ -37,16 +37,14 @@ setcolorder(d, "id")
 d[, accept_index := rowMeans(.SD), .SDcols = grep("^acc_", colnames(d))]
 d[, comply_index := rowMeans(.SD), .SDcols = grep("^com_", colnames(d))]
 
-
 # Make independent variables --------------------------------------------------
 # mhealth_index
 d[, mhealth_index := rowMeans(.SD), .SDcols = grep("^mhealth_", colnames(d))]
-d[, iwah_ref := rowMeans(.SD), .SDcols = grep("^iwah_ref", colnames(d))]
-d[, iwah_common := rowMeans(.SD), .SDcols = grep("^iwah_common", colnames(d))]
-d[, iwah_care     := rowMeans(.SD), .SDcols = grep("^iwah_care", colnames(d))]
-d[, iwah_responsibility := rowMeans(.SD), .SDcols = grep("^iwah_res", colnames(d))]
-d[, iwah_loyalty := rowMeans(.SD), .SDcols = grep("^iwah_loya", colnames(d))]
-d[, iwah_help := rowMeans(.SD), .SDcols = grep("^iwah_hel", colnames(d))]
+
+#iwah index
+d[, iwah_community := rowMeans(.SD), .SDcols =grep("(^iwah_)(.*)(1)", colnames(d))]
+d[, iwah_switzerland := rowMeans(.SD), .SDcols =grep("(^iwah_)(.*)(2)", colnames(d))]
+d[, iwah_world := rowMeans(.SD), .SDcols =grep("(^iwah_)(.*)(3)", colnames(d))]
 
 
 #using case_when because fcase not on CRAN yet
@@ -158,8 +156,9 @@ d[, svo_angle := atan(svo_given/svo_kept) * 180 / pi]
 
 
 # Delete the columns that were used to create the variables ------------------
-drop <- grep("^mhealth_|^iwah_|^svo_|^acc_|^com_", colnames(d)[1:100], value=T)
-d <- d[, !drop, with = FALSE]
+d[, grep("^mhealth_|^iwah_|^svo_|^acc_|^com_", colnames(d)[1:100]):=NULL]
+d[, grep("(^svo_)(.*)([0-9])", colnames(d)):=NULL]
+
 
 # Save data
 fwrite(d, "../../data/processed/pretest.csv")
