@@ -157,6 +157,9 @@ d[, svo_kept := rowMeans(.SD) - 50, .SDcols = grep("svo_kept", colnames(d))]
 d[, svo_given := rowMeans(.SD) - 50, .SDcols = grep("svo_given", colnames(d))]
 d[, svo_angle := atan(svo_given/svo_kept) * 180 / pi]
 
+d$understanding_self = 6-d$understanding_self 
+d[, understanding_correct := rowMeans(.SD), .SDcols = patterns("^understanding_")]
+
 # Delete the columns that were used to create the variables ------------------
 d[, grep("^mhealth_|^iwah_|^svo_|^acc_|^com_", colnames(d)[1:100]):=NULL]
 d[, grep("(^svo_)(.*)([0-9])", colnames(d)):=NULL]
