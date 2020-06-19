@@ -39,7 +39,7 @@ corrplot.mixed(data = d[, .SD, .SDcols = patterns("^risk")])
 
 ## Risk Knowledge and other Knowledge
 ```{r know, , fig.width = c(7,7)}
-corrplot.mixed(data = d[, lapply(.SD, as.double), .SDcols = patterns("^know")][, -6])
+# corrplot.mixed(data = d[, lapply(.SD, as.double), .SDcols = patterns("^know")][, -6])
 ```
 
 ## Identification with all Humanity

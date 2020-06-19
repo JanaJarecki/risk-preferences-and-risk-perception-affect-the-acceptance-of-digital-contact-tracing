@@ -26,7 +26,7 @@ d <- setnames(
 # Exclude preview data
 d <- d[status != "Survey Preview" & status != 1]
 # columns to drop
-drop <- c("status", "ipaddress", "recordeddate", "recipientlastname", "recipientfirstname", "recipientemail", "externalreference", "locationlatitude", "locationlongitude", "distributionchannel", "id", grep("^qid", names(d), value = T))
+drop <- c("status", "ipaddress", "recordeddate", "recipientlastname", "recipientfirstname", "recipientemail", "externalreference", "locationlatitude", "locationlongitude", "distributionchannel", "id", grep("^qid", names(d), value = T), "know_infected_last14_4", "know_infected_last14_5", "know_infected_last14_6", "know_infected_last14_7")
 d <- d[, !drop, with = FALSE]
 # rename id variable
 setnames(d, c("responseid", "duration (in seconds)"), c("id", "duration_seconds"))
@@ -49,6 +49,10 @@ d[, mhealth_index := rowMeans(.SD), .SDcols = patterns("^mhealth_")]
 d[, iwah_community := rowMeans(.SD), .SDcols = patterns("^iwah_.*_1")]
 d[, iwah_swiss := rowMeans(.SD), .SDcols = patterns("^iwah_.*_2")]
 d[, iwah_world := rowMeans(.SD), .SDcols = patterns("^iwah_.*_3")]
+
+# polarity
+neg <- c("honhum_makemoney", "honhum_celebrity", "honhum_special")
+d[, c(neg) := lapply(.SD, function(x) 6-x), .SDcols = neg ]
 
 #using case_when because fcase not on CRAN yet
 d <- d %>% 
