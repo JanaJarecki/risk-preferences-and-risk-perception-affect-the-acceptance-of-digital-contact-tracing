@@ -1,10 +1,12 @@
 ---
-title: Variable Check
+title: "Variable Check"
 output:
   html_document:
     code_folding: hide
-    toc: true
-    toc_float: true
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup}
@@ -58,6 +60,46 @@ corrplot.mixed(data = d[, .SD, .SDcols = patterns("^belief")])
 ## belief local/global and identification with all humanity
 ```{r belief-iwah, fig.width = c(4,4)}
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^belief_l|^belief_g|iwah_s|iwah_w")])
+```
+
+# Honesty Humility
+```{r honhum}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^honhum")])
+```
+
+# Tech
+```{r tech}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^tech")])
+```
+
+## Tech - Compliance
+```{r tech-compliance}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^tech|comply_index")])
+```
+
+## Tech - Acceptance
+```{r tech-acceptance}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^tech|accept_index")])
+```
+
+## Compliance - Acceptance
+```{r tech-acceptance}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^comply_index|accept_index")])
+```
+
+# Policy
+```{r policy}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^attitudes")])
+```
+
+# Understanding
+```{r understanding}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding")])
+```
+
+## Understanding - Acceptance and Complicance
+```{r tech-acceptance}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|accept_index|comply_index")])
 ```
 
 # Non-response checks
