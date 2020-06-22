@@ -102,6 +102,12 @@ corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding")])
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|accept_index|comply_index")])
 ```
 
+## Predictor Scores
+```{r several predictors, , fig.width = c(5,5)}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|policy_score|honhum_score|tech_score|policy_score|risk_score|svo_angle|^belief_l|^belief_g|iwah_c|iwah_w")])
+```
+
+
 # Non-response checks
 ```{r nas}
   knitr::kable(
