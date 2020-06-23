@@ -67,6 +67,12 @@ corrplot.mixed(data = d[, .SD, .SDcols = patterns("^belief_l|^belief_g|iwah_s|iw
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^honhum")])
 ```
 
+# Honesty Humility
+```{r honhum-risk}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^honhum_score|^risk")])
+```
+
+
 # Tech
 ```{r tech}
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^tech")])
@@ -105,6 +111,16 @@ corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|accept
 ## Predictor Scores
 ```{r several predictors, , fig.width = c(5,5)}
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|policy_score|honhum_score|tech_score|policy_score|risk_score|svo_angle|^belief_l|^belief_g|iwah_c|iwah_w")])
+```
+
+## Predictor Scores
+```{r several predictors 2, , fig.width = c(5,5)}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|policy_score|honhum_score|tech_score|policy_score|svo_angle|^belief_l|^belief_g|iwah_c|iwah_w|^risk")])
+```
+
+# hygene
+```{r hygene}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("safety|^risk_domain_health")])
 ```
 
 

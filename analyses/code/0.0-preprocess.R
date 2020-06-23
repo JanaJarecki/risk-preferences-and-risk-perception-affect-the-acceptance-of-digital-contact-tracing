@@ -33,6 +33,9 @@ setnames(d, c("responseid", "duration (in seconds)"), c("id", "duration_seconds"
 setcolorder(d, "id")
 # spelling error in wealth variable names
 setnames(d, gsub("wealtch", "wealth", names(d)))
+setnames(d, gsub("risk_domain_1", "risk_domain_health", names(d)))
+setnames(d, gsub("risk_domain_2", "risk_domain_data", names(d)))
+setnames(d, gsub("risk_domain_3", "risk_domain_economic", names(d)))
 
 # Make dependent variables ----------------------------------------------------
 # accept_index & comply_index
@@ -55,6 +58,8 @@ neg <- c("honhum_makemoney", "honhum_celebrity", "honhum_special")
 d[, c(neg) := lapply(.SD, function(x) 6-x), .SDcols = neg ]
 d$understanding_self = 6-d$understanding_self 
 d$attitudes_civilrights = 6-d$attitudes_civilrights 
+
+
 
 #SVO calculation (using case_when because fcase not on CRAN yet)
 d <- d %>% 
@@ -185,7 +190,8 @@ d[, grep("^mhealth_|^iwah_|^svo_|^acc_|^com_", colnames(d)[1:100]):=NULL]
 d[, grep("(^svo_)(.*)([0-9])", colnames(d)):=NULL]
 
 #Subject 13 seems to not have finihsed the survey: Quickfix
-d <- d[1:12,]
+d <- d[-13,]
 
 # Save data
 fwrite(d, "../../data/processed/pretest.csv")
+
