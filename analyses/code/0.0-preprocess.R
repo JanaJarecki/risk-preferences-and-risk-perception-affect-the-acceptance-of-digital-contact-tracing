@@ -26,26 +26,33 @@ d <- setnames(
 # Exclude preview data
 d <- d[status != "Survey Preview" & status != 1]
 # columns to drop
-drop <- c("status", "ipaddress", "recordeddate", "recipientlastname", "recipientfirstname", "recipientemail", "externalreference", "locationlatitude", "locationlongitude", "distributionchannel", "id", grep("^qid", names(d), value = T))
+drop <- c("status", "ipaddress", "recordeddate", "recipientlastname", "recipientfirstname", "recipientemail", "externalreference", "locationlatitude", "locationlongitude", "distributionchannel", "id", grep("^qid", names(d), value = T), "know_infected_last14_4", "know_infected_last14_5", "know_infected_last14_6", "know_infected_last14_7")
 d <- d[, !drop, with = FALSE]
 # rename id variable
 setnames(d, c("responseid", "duration (in seconds)"), c("id", "duration_seconds"))
 setcolorder(d, "id")
+# spelling error in wealth variable names
+setnames(d, gsub("wealtch", "wealth", names(d)))
 
 # Make dependent variables ----------------------------------------------------
 # accept_index & comply_index
-d[, accept_index := rowMeans(.SD), .SDcols = grep("^acc_", colnames(d))]
-d[, comply_index := rowMeans(.SD), .SDcols = grep("^com_", colnames(d))]
+# .SDcols = patterns():
+#            makes a Sub Dataframe (.SD) from columns matching the pattern
+#        :=
+#            is like <- but inside a data.table
+d[, accept_index := rowMeans(.SD), .SDcols = patterns("^acc_")]
+d[, comply_index := rowMeans(.SD), .SDcols = patterns("^com_")]
 
 # Make independent variables --------------------------------------------------
 # mhealth_index
-d[, mhealth_index := rowMeans(.SD), .SDcols = grep("^mhealth_", colnames(d))]
+d[, mhealth_index := rowMeans(.SD), .SDcols = patterns("^mhealth_")]
+d[, iwah_community := rowMeans(.SD), .SDcols = patterns("^iwah_.*_1")]
+d[, iwah_swiss := rowMeans(.SD), .SDcols = patterns("^iwah_.*_2")]
+d[, iwah_world := rowMeans(.SD), .SDcols = patterns("^iwah_.*_3")]
 
-#iwah index
-d[, iwah_community := rowMeans(.SD), .SDcols =grep("(^iwah_)(.*)(1)", colnames(d))]
-d[, iwah_switzerland := rowMeans(.SD), .SDcols =grep("(^iwah_)(.*)(2)", colnames(d))]
-d[, iwah_world := rowMeans(.SD), .SDcols =grep("(^iwah_)(.*)(3)", colnames(d))]
-
+# polarity
+neg <- c("honhum_makemoney", "honhum_celebrity", "honhum_special")
+d[, c(neg) := lapply(.SD, function(x) 6-x), .SDcols = neg ]
 
 #using case_when because fcase not on CRAN yet
 d <- d %>% 
@@ -154,6 +161,8 @@ d[, svo_kept := rowMeans(.SD) - 50, .SDcols = grep("svo_kept", colnames(d))]
 d[, svo_given := rowMeans(.SD) - 50, .SDcols = grep("svo_given", colnames(d))]
 d[, svo_angle := atan(svo_given/svo_kept) * 180 / pi]
 
+d$understanding_self = 6-d$understanding_self 
+d[, understanding_correct := rowMeans(.SD), .SDcols = patterns("^understanding_")]
 
 # Delete the columns that were used to create the variables ------------------
 d[, grep("^mhealth_|^iwah_|^svo_|^acc_|^com_", colnames(d)[1:100]):=NULL]

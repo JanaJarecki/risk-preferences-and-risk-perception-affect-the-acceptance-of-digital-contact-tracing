@@ -1,0 +1,111 @@
+---
+title: "Variable Check"
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, cache = FALSE, out.width = "50%")
+```
+
+```{r initialize}
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(data.table, corrplot)
+pacman::p_load_gh("janajarecki/themejj")
+.default_font <- "Roboto Condensed"
+theme_set(themejj())
+theme_update(panel.background = element_rect(color = "black", size = 1))
+
+
+# set working directory to THIS file location
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+# Load preprocessed data
+d <- fread("../../data/processed/pretest.csv")
+corrplot.mixed <- function(data) {
+  colnames(data) <- gsub("_", "\n", colnames(data))
+  corrplot::corrplot.mixed(cor(data), order="hclust", tl.col="black")
+}
+```
+
+## Risk Attitudes
+```{r risk, fig.dim = c(4,4)}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^risk")])
+```
+
+## Risk Knowledge and other Knowledge
+```{r know, , fig.width = c(7,7)}
+# corrplot.mixed(data = d[, lapply(.SD, as.double), .SDcols = patterns("^know")][, -6])
+```
+
+## Identification with all Humanity
+```{r iwah, fig.width = c(3,3)}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^iwah")])
+```
+
+## Safety-related behavior
+```{r safety, fig.width = c(3,3)}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^safety")])
+```
+
+## belief local/global
+```{r belief, , fig.width = c(3,3)}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^belief")])
+```
+
+## belief local/global and identification with all humanity
+```{r belief-iwah, fig.width = c(4,4)}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^belief_l|^belief_g|iwah_s|iwah_w")])
+```
+
+# Honesty Humility
+```{r honhum}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^honhum")])
+```
+
+# Tech
+```{r tech}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^tech")])
+```
+
+## Tech - Compliance
+```{r tech-compliance}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^tech|comply_index")])
+```
+
+## Tech - Acceptance
+```{r tech-acceptance}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^tech|accept_index")])
+```
+
+## Compliance - Acceptance
+```{r com-acceptance}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^comply_index|accept_index")])
+```
+
+# Policy
+```{r policy}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^attitudes")])
+```
+
+# Understanding
+```{r understanding}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding")])
+```
+
+## Understanding - Acceptance and Complicance
+```{r under-acceptance}
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|accept_index|comply_index")])
+```
+
+# Non-response checks
+```{r nas}
+  knitr::kable(
+    d[, .(income = table(income_num_1_text == -99),
+        wealth = table(wealth_num_1_text == -99))]
+  )
+```
