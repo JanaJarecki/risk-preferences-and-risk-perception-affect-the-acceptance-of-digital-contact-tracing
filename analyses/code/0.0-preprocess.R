@@ -1,5 +1,5 @@
 if (!require(pacman)) install.packages("pacman")
-pacman::p_load(data.table, dplyr)
+pacman::p_load(data.table, dplyr, rstudioapi)
 
 # ---------------------------------------------------------------------
 # Git does NOT sync the raw data (data protection!), therefore
@@ -26,13 +26,16 @@ d <- setnames(
 # Exclude preview data
 d <- d[status != "Survey Preview" & status != 1]
 # columns to drop
-drop <- c("status", "ipaddress", "recordeddate", "recipientlastname", "recipientfirstname", "recipientemail", "externalreference", "locationlatitude", "locationlongitude", "distributionchannel", "id", grep("^qid", names(d), value = T), "know_infected_last14_4", "know_infected_last14_5", "know_infected_last14_6", "know_infected_last14_7")
+drop <- c("status", "ipaddress", "recordeddate", "recipientlastname", "recipientfirstname", "recipientemail", "externalreference", "locationlatitude", "locationlongitude", "distributionchannel", "id", grep("^qid", names(d), value = T))
 d <- d[, !drop, with = FALSE]
 # rename id variable
 setnames(d, c("responseid", "duration (in seconds)"), c("id", "duration_seconds"))
 setcolorder(d, "id")
 # spelling error in wealth variable names
 setnames(d, gsub("wealtch", "wealth", names(d)))
+setnames(d, gsub("risk_domain_1", "risk_domain_health", names(d)))
+setnames(d, gsub("risk_domain_2", "risk_domain_data", names(d)))
+setnames(d, gsub("risk_domain_3", "risk_domain_economic", names(d)))
 
 # Make dependent variables ----------------------------------------------------
 # accept_index & comply_index
@@ -53,8 +56,12 @@ d[, iwah_world := rowMeans(.SD), .SDcols = patterns("^iwah_.*_3")]
 # polarity
 neg <- c("honhum_makemoney", "honhum_celebrity", "honhum_special")
 d[, c(neg) := lapply(.SD, function(x) 6-x), .SDcols = neg ]
+d$understanding_self = 6-d$understanding_self 
+d$attitudes_civilrights = 6-d$attitudes_civilrights 
 
-#using case_when because fcase not on CRAN yet
+
+
+#SVO calculation (using case_when because fcase not on CRAN yet)
 d <- d %>% 
   mutate(svo_kept_1 = 85,
          svo_given_1 = case_when(svo_1 == 1 ~ 85,
@@ -130,6 +137,7 @@ d <- d %>%
                                  svo_5 == 8 ~ 56,
                                  svo_5 == 9 ~ 50),
          svo_given_5 = case_when(svo_5 == 1 ~ 50,
+<<<<<<< HEAD
                                  svo_5 == 2 ~ 56,
                                  svo_5 == 3 ~ 63,
                                  svo_5 == 4 ~ 69,
@@ -157,17 +165,63 @@ d <- d %>%
                                  svo_6 == 8 ~ 81,
                                  svo_6 == 9 ~ 85))
 
+=======
+                                 svo_5 == 2 ~ 54,
+                                 svo_5 == 3 ~ 59,
+                                 svo_5 == 4 ~ 63,
+                                 svo_5 == 5 ~ 68,
+                                 svo_5 == 6 ~ 72,
+                                 svo_5 == 7 ~ 76,
+                                 svo_5 == 8 ~ 81,
+                                 svo_5 == 9 ~ 85),
+         svo_kept_6 =  case_when(svo_6 == 1 ~ 20,
+                                 svo_6 == 2 ~ 25,
+                                 svo_6 == 3 ~ 30,
+                                 svo_6 == 4 ~ 35,
+                                 svo_6 == 5 ~ 40,
+                                 svo_6 == 6 ~ 45,
+                                 svo_6 == 7 ~ 50,
+                                 svo_6 == 8 ~ 55,
+                                 svo_6 == 9 ~ 60),
+         svo_given_6 = case_when(svo_6 == 1 ~ 70,
+                                 svo_6 == 2 ~ 65,
+                                 svo_6 == 3 ~ 60,
+                                 svo_6 == 4 ~ 55,
+                                 svo_6 == 5 ~ 50,
+                                 svo_6 == 6 ~ 45,
+                                 svo_6 == 7 ~ 40,
+                                 svo_6 == 8 ~ 35,
+                                 svo_6 == 9 ~ 30))
+>>>>>>> rebecca-albrecht-master
 d[, svo_kept := rowMeans(.SD) - 50, .SDcols = grep("svo_kept", colnames(d))]
 d[, svo_given := rowMeans(.SD) - 50, .SDcols = grep("svo_given", colnames(d))]
 d[, svo_angle := atan(svo_given/svo_kept) * 180 / pi]
 
-d$understanding_self = 6-d$understanding_self 
+#Normalize other safety variables
+normalize <- function(vec){
+  sapply(vec, function(x) (x - min(vec))/(max(vec)-min(x)))
+}
+
+d[, normalize(.SD), .SDcols = patterns("^safety_")]
+apply(d[, .SD, .SDcols = patterns("^safety_")], 2, normalize)
+normalize(d[, .SD, .SDcols = patterns("^safety_")][,2])
+
+
+##Create scores
+d[, honhum_score := rowMeans(.SD), .SDcols = patterns("^honhum_")]
+d[, tech_score := rowMeans(.SD), .SDcols = patterns("^tech_")]
+d[, policy_score := rowMeans(.SD), .SDcols = patterns("^attitudes_")]
 d[, understanding_correct := rowMeans(.SD), .SDcols = patterns("^understanding_")]
+d[, risk_score := rowMeans(.SD), .SDcols = patterns("^risk_")]
+
 
 # Delete the columns that were used to create the variables ------------------
 d[, grep("^mhealth_|^iwah_|^svo_|^acc_|^com_", colnames(d)[1:100]):=NULL]
 d[, grep("(^svo_)(.*)([0-9])", colnames(d)):=NULL]
 
+#Subject 13 seems to not have finihsed the survey: Quickfix
+d <- d[-13,]
 
 # Save data
 fwrite(d, "../../data/processed/pretest.csv")
+
