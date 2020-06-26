@@ -10,10 +10,11 @@ output:
 ---
 
 ```{r setup}
-knitr::opts_chunk$set(message = FALSE, warning = FALSE, cache = FALSE, out.width = "50%")
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, cache = FALSE, out.width = "66%")
 ```
 
 ```{r initialize}
+source("0.0-preprocess.R", chdir = TRUE)
 if (!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, corrplot)
 pacman::p_load_gh("janajarecki/themejj")
@@ -32,6 +33,10 @@ corrplot.mixed <- function(data) {
 }
 ```
 
+# Sample
+A total of `r nrow(d)` participants participated, `r length(unlist(ex))` were excluded.
+
+# Independent Variables
 ## Risk Attitudes
 ```{r risk, fig.dim = c(4,4)}
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^risk")])
@@ -105,16 +110,16 @@ corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding")])
 
 ## Understanding - Acceptance and Complicance
 ```{r under-acceptance}
-corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|accept_index|comply_index")])
+corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_score|accept_index|comply_index")])
 ```
 
-## Predictor Scores
-```{r several predictors, , fig.width = c(5,5)}
+# Predictor Scores 1
+```{r several predictors, , fig.width = c(10,10)}
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|policy_score|honhum_score|tech_score|policy_score|risk_score|svo_angle|^belief_l|^belief_g|iwah_c|iwah_w")])
 ```
 
-## Predictor Scores
-```{r several predictors 2, , fig.width = c(5,5)}
+# Predictor Scores 2
+```{r several predictors 2, , fig.width = c(10,10)}
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^understanding_correct|policy_score|honhum_score|tech_score|policy_score|svo_angle|^belief_l|^belief_g|iwah_c|iwah_w|^risk")])
 ```
 
