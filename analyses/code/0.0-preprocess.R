@@ -38,7 +38,7 @@ setcolorder(d, "id")
 ex <- list(progress = NULL, dataquality = NULL)
 ex$progress    <- d[progress < 95]$id
 ex$dataquality <- d[data_quality < 4]$id
-# TODO in preprocess line 42: add exclusion for failing attention check
+# @todo in preprocess line 42: add exclusion for failing attention check
 # ex$attention <- d[, sum(.SD == c(3, 1, 5) < 2), .SDcols = patterns("^check"), by = id][V1 == FALSE]$id
 d <- d[!id %in% unlist(ex)]
 
@@ -79,13 +79,13 @@ d[, iwah_swiss     := rowMeans(.SD), .SDcols = patterns("^iwah_.*_2")]
 d[, iwah_world     := rowMeans(.SD), .SDcols = patterns("^iwah_.*_3")]
 d[, iwah_diff_score := iwah_community - iwah_world]
 d[, svo_angle      := calc_svo_angle(d)] # see utilities.R
-# TODO Preprocess, line 72: Make risk perception score from new know data
+# @todo Preprocess, line 72: Make risk perception score from new know data
 d[, policy_score   := rowMeans(.SD), .SDcols = patterns("^attitudes_")]
 d[, mhealth_score  := rowMeans(.SD), .SDcols = patterns("^mhealth_")]
 d[, tech_score     := rowMeans(.SD), .SDcols = patterns("^tech_")]
 d[, compreh_score := rowMeans(.SD), .SDcols =patterns("^understanding_")]
 # The risk score is just for testing purposes
-# TODO Preprocess: remove risk `score` calculation
+# @@todo Preprocess: remove risk `score` calculation
 d[, risk_score := rowMeans(.SD), .SDcols = patterns("^risk_")]
 
 
