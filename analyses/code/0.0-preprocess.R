@@ -2,9 +2,7 @@ if (!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, dplyr, rstudioapi)
 
 # set working directory to THIS file location if rstudio
-if (rstudioapi::isAvailable()) {
-   setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-}
+if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) }
 source("utilities.R")
 
 # ---------------------------------------------------------------------

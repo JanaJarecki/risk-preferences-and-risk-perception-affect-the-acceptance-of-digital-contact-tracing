@@ -1,9 +1,16 @@
+# ==========================================================================
+# Preprocessing of the main BCRQ study
+# ==========================================================================
 if (!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, dplyr, rstudioapi)
 
+# set working directory to THIS file location if rstudio
+if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) }
+source("utilities.R")
+
 # ---------------------------------------------------------------------
 # Git does NOT sync the raw data (data protection!), therefore
-# export the data and save as `data/raw/pretest.csv" as follows:
+# export the data and save as `data/raw/data.csv" as follows:
 #   * format: csv
 #   * Use numeric values (not 'Use choice text')
 #   * Recode unseen values as -99 and 0
@@ -15,13 +22,10 @@ pacman::p_load(data.table, dplyr, rstudioapi)
 # ---------------------------------------------------------------------
 
 
-# set working directory to THIS file location
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-
 # Load raw data and set column names to lower-case names
 d <- setnames(
-  fread("../../data/raw/test.csv", skip = 2),
-  tolower(names(fread("../../data/raw/test.csv", nrows = 0))))
+  fread("../../data/raw/data.csv", skip = 2),
+  tolower(names(fread("../../data/raw/data.csv", nrows = 0))))
 # Exclude preview data
 d <- d[status != "Survey Preview" & status != 1]
 # columns to drop
