@@ -73,6 +73,10 @@ corrplot.mixed(data = d[, .SD, .SDcols = patterns("^iwah_community$|iwah_swiss$|
 ## Safety-related behavior
 ```{r safety, fig.width = c(3,3)}
 corrplot.mixed(data = d[, .SD, .SDcols = patterns("^safety")])
+hist.raw("safety_mask", bw = .1)
+hist.raw("safety_distance", bw = .1)
+hist.raw("safety_hygene", bw = .1)
+
 ```
 
 ## belief local/global
