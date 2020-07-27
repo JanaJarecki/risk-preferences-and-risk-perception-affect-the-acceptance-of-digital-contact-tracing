@@ -65,6 +65,7 @@ hist.raw("raw_know_age", 75, 5)
 hist.raw("know_symptoms_perc", NA, .05)
 hist.raw("perc_infected_next7", NA, 5)
 hist.raw("perc_infected_last7", NA, 5)
+hist.raw("perc_data", NA, 5)
 
 ```
 
