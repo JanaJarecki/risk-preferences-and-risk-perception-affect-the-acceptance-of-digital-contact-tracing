@@ -24,7 +24,7 @@ theme_set(theme_classic())
 # set working directory to THIS file location
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # Load preprocessed data
-source("0.1-preprocess.R")
+# source("0.1-preprocess.R")
 d <- fread("../../data/processed/data.csv")
 
 corrplot.mixed <- function(data) {
@@ -63,6 +63,9 @@ hist.raw("raw_know_infected_all_ab", 35000, 2000)
 hist.raw("know_econ", NA, 25)
 hist.raw("raw_know_age", 75, 5)
 hist.raw("know_symptoms_perc", NA, .05)
+hist.raw("perc_infected_next7", NA, 5)
+hist.raw("perc_infected_last7", NA, 5)
+
 ```
 
 ## Identification with all Humanity
