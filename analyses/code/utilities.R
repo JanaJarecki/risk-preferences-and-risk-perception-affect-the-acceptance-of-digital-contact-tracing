@@ -105,6 +105,5 @@ calc_svo_angle <- function(d) {
       )
    d[, svo_kept := rowMeans(.SD) - 50, .SDcols = patterns("svo_kept")]
    d[, svo_given := rowMeans(.SD) - 50, .SDcols = patterns("svo_given")]
-   d[, svo_angle := atan(svo_given/svo_kept) * 180 / pi]
-   return(d$svo_angle)
+   return(d[, atan(svo_given/svo_kept) * 180 / pi])
 }
