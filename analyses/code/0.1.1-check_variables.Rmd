@@ -24,7 +24,7 @@ theme_set(theme_classic())
 # set working directory to THIS file location
 # setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 # Load preprocessed data
-# source("0.1-preprocess.R")
+source("0.1-preprocess.R")
 d <- fread("../../data/processed/data.csv")
 
 corrplot.mixed <- function(data) {
