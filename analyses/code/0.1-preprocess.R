@@ -82,7 +82,7 @@ calc_perc_correct <- function(x) {
    false_negative <- symptoms_wrong %in% x
    return(mean(c(true_positive, !false_negative)))
 }
-d[, know_symptoms := calc_perc_correct(know_symptoms), by = id]
+d[, know_symptoms_perc := calc_perc_correct(know_symptoms), by = id]
 # Technology usage
 d[has_smartphone == 1, tech := rowMeans(.SD), .SDcols = c("tech_general", "tech_interest_apps", "tech_interest_ability")]
 d[has_smartphone == 0, tech := tech_general]
@@ -93,6 +93,9 @@ d[has_smartphone == 0, tech := tech_general]
 norm_range <- function(x) {
    (x - min(x)) / (max(x) - min(x))
 }
+d$raw_know_age <- d$know_age
+d$raw_know_infected_all_ab <- d$know_infected_all_ab
+d$raw_know_death_total <- d$know_death_total
 d$know_age             <- 1-norm_range(abs(d$know_age - 65))
 d$know_infected_all_ab <- 1-norm_range(abs(d$know_infected_all_ab-32500))
 d$know_death_total     <- 1-norm_range(abs(d$know_death_total - 1750))
@@ -114,14 +117,13 @@ d[, iwah__community   := rowMeans(.SD), .SDcols = patterns("^iwah_.*_1")]
 d[, iwah__swiss       := rowMeans(.SD), .SDcols = patterns("^iwah_.*_2")]
 d[, iwah__world       := rowMeans(.SD), .SDcols = patterns("^iwah_.*_3")]
 d[, iwah__diff__score := iwah__community - iwah__world]
-d[, svo__angle        := calc_svo_angle(d)] # see utilities.R
+d[, svo__angle        := suppressWarnings(calc_svo_angle(d))] # see utilities.R
 d[, policy__score     := rowMeans(.SD), .SDcols = patterns("^attitudes_")]
 d[, mhealth__score    := rowMeans(.SD), .SDcols = patterns("^mhealth_")]
 d[, tech__score       := rowMeans(.SD), .SDcols = patterns("^tech_")]
 d[, compreh__score    := rowMeans(.SD), .SDcols =patterns("^comprehension_")]
 d[, has__symptoms     := rowSums(.SD), .SDcols = patterns("^has_symptoms_")]
-d[, know__health      := rowMeans(.SD), .SDcols = patterns("know_age|know_infected_all_ab|know_death_total|know_symptoms")]
-
+d[, know__health      := rowMeans(.SD), .SDcols = patterns("know_age|know_infected_all_ab|know_death_total|know_symptoms_perc")]
 # Moderators
 d[, belief__efficiency:= rowMeans(.SD),.SDcols=patterns("belief_eff|belief_5")]
 d[, belief__local     := rowMeans(.SD), .SDcols = patterns("belief_local")]
@@ -131,12 +133,13 @@ d[, belief__global    := rowMeans(.SD), .SDcols = patterns("belief_global")]
 
 
 # Delete the columns that were used to create the variables ------------------
-d[, grep("(^svo_)(.*)([0-9])", colnames(d)):=NULL]
-d[, grep("^mhealth_|^iwah_|^svo_|^acc_|^com_|^vacc|^comprehension_|^honhum_|^perc_|^attitudes_|^know|^tech_|belief_|has_symptoms", 
-         colnames(d)[1:100]):=NULL]
+# d[, grep("(^svo_)(.*)([0-9])", colnames(d)):=NULL]
+# d[, grep("^mhealth_|^iwah_|^svo_|^acc_|^com_|^vacc|^comprehension_|^honhum_|^perc_|^attitudes_|^know|^tech_|belief_|has_symptoms", 
+#          colnames(d)[1:100]):=NULL]
 
 
 # Cosmetics
+setnames(d, c("belief_efficiency", "belief_local", "belief_global"), paste0("raw_", c("belief_efficiency", "belief_local", "belief_global")))
 setnames(d, gsub("__", "_", names(d)))
 
 
