@@ -83,9 +83,6 @@ calc_perc_correct <- function(x) {
    return(mean(c(true_positive, !false_negative)))
 }
 d[, know_symptoms_perc := calc_perc_correct(know_symptoms), by = id]
-# Technology usage
-d[has_smartphone == 1, tech := rowMeans(.SD), .SDcols = c("tech_general", "tech_interest_apps", "tech_interest_ability")]
-d[has_smartphone == 0, tech := tech_general]
 
 
 
@@ -99,6 +96,8 @@ d$raw_know_death_total <- d$know_death_total
 d$know_age             <- 1-norm_range(abs(d$know_age - 65))
 d$know_infected_all_ab <- 1-norm_range(abs(d$know_infected_all_ab-32500))
 d$know_death_total     <- 1-norm_range(abs(d$know_death_total - 1750))
+d$perc_infected_next7 <- scale(d$perc_infected_next7)
+d$perc_infected_last7 <- scale(d$perc_infected_last7)
 
 
 
@@ -111,26 +110,25 @@ d[, vaccine_index := rowMeans(.SD), .SDcols = patterns("^vacc_")]
 
 
 # Make independent variables -----------------------------------------
-d[, honhum__score     := rowMeans(.SD), .SDcols = patterns("^honhum_")]
+d[, honhum_score     := rowMeans(.SD), .SDcols = patterns("^honhum_")]
 d[, perc__health :=rowMeans(.SD), .SDcols=patterns("^perc_infect|perc_severe")]
 d[, iwah__community   := rowMeans(.SD), .SDcols = patterns("^iwah_.*_1")]
 d[, iwah__swiss       := rowMeans(.SD), .SDcols = patterns("^iwah_.*_2")]
 d[, iwah__world       := rowMeans(.SD), .SDcols = patterns("^iwah_.*_3")]
-d[, iwah__diff__score := iwah__community - iwah__world]
+d[, iwah__diff_score := iwah__community - iwah__world]
 d[, svo__angle        := suppressWarnings(calc_svo_angle(d))] # see utilities.R
-d[, policy__score     := rowMeans(.SD), .SDcols = patterns("^attitudes_")]
-d[, mhealth__score    := rowMeans(.SD), .SDcols = patterns("^mhealth_")]
-d[, tech__score       := rowMeans(.SD), .SDcols = patterns("^tech_")]
-d[, compreh__score    := rowMeans(.SD), .SDcols =patterns("^comprehension_")]
+d[, policy_score     := rowMeans(.SD), .SDcols = patterns("^attitudes_")]
+d[, mhealth_score    := rowMeans(.SD), .SDcols = patterns("^mhealth_")]
+d[, tech_score       := rowMeans(.SD), .SDcols = patterns("^tech_")]
+d[, compreh_score    := rowMeans(.SD), .SDcols =patterns("^comprehension_data|comprehension_other|comprehension_severe")]
 d[, has__symptoms     := rowSums(.SD), .SDcols = patterns("^has_symptoms_")]
-d[, know__health      := rowMeans(.SD), .SDcols = patterns("know_age|know_infected_all_ab|know_death_total|know_symptoms_perc")]
-# Moderators
+d[, know__health_score      := rowMeans(.SD), .SDcols = patterns("know_age|know_infected_all_ab|know_death_total|know_symptoms_perc")]
 d[, belief__efficiency:= rowMeans(.SD),.SDcols=patterns("belief_eff|belief_5")]
 d[, belief__local     := rowMeans(.SD), .SDcols = patterns("belief_local")]
 d[, belief__global    := rowMeans(.SD), .SDcols = patterns("belief_global")]
-
-
-
+d[, safebehavior_score:= rowMeans(.SD), .SDcols = patterns("^safety_")]
+d[has_smartphone == 0L, tech_score := as.double(tech_general)]
+d[has_smartphone == 1L, tech_score := rowMeans(.SD, na.rm = TRUE), .SDcols = patterns("^tech_")]
 
 # Delete the columns that were used to create the variables ------------------
 # d[, grep("(^svo_)(.*)([0-9])", colnames(d)):=NULL]

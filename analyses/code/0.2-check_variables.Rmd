@@ -15,35 +15,51 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE, cache = FALSE, out.width
 ```
 
 ```{r initialize}
-if (!require(pacman)) install.packages("pacman")
-pacman::p_load(data.table, corrplot, ltm)
-pacman::p_load_gh("janajarecki/themejj")
-.default_font <- "Roboto Condensed"
-theme_set(theme_classic())
+  if (!require(pacman)) install.packages("pacman")
+  pacman::p_load(data.table, corrplot, ltm)
+  pacman::p_load_gh("janajarecki/themejj")
+  .default_font <- "Roboto Condensed"
+  theme_set(theme_classic())
+  # Load preprocessed data
+  source("0.1-preprocess.R")
+  d <- fread("../../data/processed/data.csv")
 
-# set working directory to THIS file location
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-# Load preprocessed data
-source("0.1-preprocess.R")
-d <- fread("../../data/processed/data.csv")
+  corrplot.mixed <- function(data) {
+    colnames(data) <- gsub("_", "\n", colnames(data))
+    a <- cronbach.alpha(data)$alpha 
+    corrplot::corrplot.mixed(cor(data), order="hclust", tl.col="black", title= paste("Cronbach's alpha = ", round(a, 2)), mar=c(0,0,1,0))
+  }
 
-corrplot.mixed <- function(data) {
-  colnames(data) <- gsub("_", "\n", colnames(data))
-  a <- cronbach.alpha(data)$alpha 
-  corrplot::corrplot.mixed(cor(data), order="hclust", tl.col="black", title= paste("Cronbach's alpha = ", round(a, 2)), mar=c(0,0,1,0))
-}
-
-hist.raw <- function(var, true = NA, bw) {
-  pp <- ggplot(d, aes_string(x = var)) +
-  geom_histogram(binwidth = bw, color = "black", fill = "grey90") +
-  scale_y_continuous(expand = c(0,0))
-  if (!is.na(true)) pp <- pp + geom_vline(aes(xintercept = true), color = "red", size = 2)
-  plot(pp)
-}
+  hist.raw <- function(var, true = NA, bw) {
+    pp <- ggplot(d, aes_string(x = var)) +
+    geom_histogram(binwidth = bw, color = "black", fill = "grey90") +
+    scale_y_continuous(expand = c(0,0))
+    if (!is.na(true)) pp <- pp + geom_vline(aes(xintercept = true), color = "red", size = 2)
+    plot(pp)
+  }
 ```
 
 # Sample
 A total of `r nrow(d) + length(unique(unlist(excluded$V1)))` participants participated, `r length(unique(unlist(excluded$V1)))` were excluded, `r excluded[, sum(!is.na(progress))]` because they did not finish the survey; leaving **_N =_ `r nrow(d)`**.
+
+# Validity of Risk Measures
+Risk-perception
+```{r}
+  d[, new_perc_score := perc_infected_next7 - perc_infected_last7]
+  corrplot.mixed(data = d[, .SD, .SDcols = patterns("safeb|perc_inf|score|svo_score|perc_health|index")])
+  
+  ggplot(d, aes(x = factor(female, labels = c("Male", "Female", "NA")), y = perc_score)) +
+    geom_violin() +
+    geom_boxplot(width = .1, fill = "lightgrey") +
+    geom_point(stat = "summary", color = "red", size = 4) +
+    xlab("Gender") +
+    ylab("Risk Perception next 7 days, z-standardized, means")
+```
+
+Safety behavior with other scores
+```{r}
+  corrplot.mixed(data = d[, .SD, .SDcols = patterns("safeb|new_perc")])
+```
 
 
 
@@ -66,7 +82,6 @@ hist.raw("know_symptoms_perc", NA, .05)
 hist.raw("perc_infected_next7", NA, 5)
 hist.raw("perc_infected_last7", NA, 5)
 hist.raw("perc_data", NA, 5)
-
 ```
 
 ## Identification with all Humanity
