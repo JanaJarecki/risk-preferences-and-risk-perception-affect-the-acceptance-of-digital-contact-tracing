@@ -14,7 +14,7 @@ source("utilities.R")
 # Git does NOT sync the raw data (data protection!), therefore
 # export the data and save as `data/raw/data.csv" as follows:
 #   * format: csv
-#   * Use numeric values (not 'Use choice text')
+#   * Use "choice text", not numeric variables
 #   * Recode unseen values as -99 and 0
 # ---------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ setnames(d, gsub("wealtch", "wealth", names(d)))
 # List to store the reasons for exclusions
 excluded <- list()
 excluded$progress    <- d[progress < 100]$id
-excluded$dataquality <- d[data_quality < 4]$id
+excluded$dataquality <- d[as.numeric(data_quality) < 4]$id
 excluded$attention   <- d[, all(.SD == c(3,1,5)), .SDcols = patterns("^check"), by = id][V1 == FALSE]$id
 d <- d[!id %in% unlist(excluded)]
 # Participants who did not complete IWAH
@@ -56,22 +56,55 @@ d[, c(to_reverse) := lapply(.SD, function(x) 6 - x), .SDcols = to_reverse]
 
 
 # Recode variables -------------------------------------------------------
-recode_dict   <- data.table(old=c(11:20), new=c(2,8,13,18,23,28,33,38,43,46))
-d$perc_severe <- sapply(d$perc_severe, function(x){recode_dict[old==x, new]})
-d$perc_data  <- sapply(d$perc_data, function(x){recode_dict[old==x, new]})
-d$perc_moneyloss<-sapply(d$perc_moneyloss, function(x){recode_dict[x==(old-10), new]})
-recode_dict2 <- data.table(old=c(1,2,3,13,4,14,15,5,6,7,8,9,16,10,12), new=c(25,75,125,175,225,275,325,375,425,475,525,575,625,675,725))
-d$know_econ = sapply(d$know_econ, function(x){recode_dict2[old==x, new]})
+recode_dict <- data.table(old=c(11:20),new=c(2,8,13,18,23,28,33,38,43,46))
+d[, perc_severe := recode_dict[copy(.SD), on=.(old=perc_severe), x.new]] #fast!
+d[, perc_data := recode_dict[copy(.SD), on=.(old=perc_data), x.new]] #fast!
+d[, perc_moneyloss := recode_dict[copy(.SD),on=.(old=perc_moneyloss),x.new]]
+recode_dict <- data.table(old=c(1,2,3,13,4,14,15,5,6,7,8,9,16,10,12), new=c(25,75,125,175,225,275,325,375,425,475,525,575,625,675,725))
+d[, know_econ := recode_dict[copy(.SD), on=.(old=know_econ), x.new]]
+# `income_loss` only shown if had_work == 1, recode to 0 = no loss of income
+d[income_loss == -1, income_loss := 0]
+# 'homeoffice'  only shown if has_work == 1, recode to 0 = not working at home
+d[homeoffice == -1, homeoffice := 0]
 
 
-
-# Transform and impute variables ----------------------------------------------
+# Recode variables -----------------------------------------------------------
 # Replace NA values
 d$household_kids  <- ifelse(is.na(d$household_kids), 0, d$household_kids)
 d$income_loss     <- ifelse(is.na(d$income_loss), -1, d$income_loss)
 d$homeoffice      <- ifelse(is.na(d$homeoffice), -1, d$homeoffice)
 # Replace value that has been entered before the check for a number was implemented in Qualtrics. The actual value in the raw file is "Über 70".
 d[id == "R_2uE8zq3yYMhqyaI", "know_age"] <- 70
+
+
+
+# Clean open-ended texts -----------------------------------------------------
+# Non-numeric entries in open text-fields in columns: wealth, income, community
+cols  <- c("income_num_1_text", "wealth_num_1_text", "community_1_text")
+nonum <- "'|.-| \\(Familie\\)| \\(nur mein\\)| |\\*|\\^|,|`"
+d[, c(cols):= lapply(.SD, gsub, pattern=nonum, replacement=""), .SDcols=cols]
+# These need manual replacement
+d[income_num_1_text=="370Ã¼", income_num_1_text := "3700"]
+d[wealth_num_1_text=="3mio", wealth_num_1_text := "3000000"]
+d[wealth_num_1_text=="700â\200\230000", wealth_num_1_text := "700000"]
+d[wealth_num_1_text=="8ooo", wealth_num_1_text := "8000"]
+d[community_1_text=="350Ã¼", community_1_text := "3500"]
+d[community_1_text=="2â\200\230500", community_1_text := "2500"]
+
+# Transform and impute values -------------------------------------------------
+# Impute income, wealth, community size if sbjct only gave categorical rsponse
+d$income_imputed <- as.numeric(d$income_num_1_text)
+dict <- data.table(income_cat=0:9, new=c(NA,100*c(5,15,25,35,45,55,65,75,85)))
+d[income_num==0, income_imputed := dict[copy(.SD),on=.(income_cat), x.new]]
+d$wealth_imputed <- as.numeric(d$wealth_num_1_text)
+dict <- data.table(wealth_cat=0:8,new=c(NA,1000*c(0,12.5,37.5,75,150,350,750,1500)))
+d[wealth_num==0, wealth_imputed := dict[copy(.SD), on=.(wealth_cat), x.new]]
+d$community_imputed <- as.numeric(d$community_1_text)
+dict <- data.table(community_cat=0:5,new=c(NA,250,7500,25000,75000,200000))
+d[community==2, community_imputed := dict[copy(.SD),on=.(community_cat),x.new]]
+
+
+
 # Transform the knowledge of corona symptoms iinto correct or wrong
 calc_perc_correct <- function(x) {
    # Calculation takes into account true pos and true neg symptoms
@@ -98,6 +131,7 @@ d$know_infected_all_ab <- 1-norm_range(abs(d$know_infected_all_ab-32500))
 d$know_death_total     <- 1-norm_range(abs(d$know_death_total - 1750))
 d$perc_infected_next7 <- scale(d$perc_infected_next7)
 d$perc_infected_last7 <- scale(d$perc_infected_last7)
+d$perc_severe <- scale(d$perc_severe)
 
 
 
@@ -121,7 +155,7 @@ d[, policy_score     := rowMeans(.SD), .SDcols = patterns("^attitudes_")]
 d[, mhealth_score    := rowMeans(.SD), .SDcols = patterns("^mhealth_")]
 d[, tech_score       := rowMeans(.SD), .SDcols = patterns("^tech_")]
 d[, compreh_score    := rowMeans(.SD), .SDcols =patterns("^comprehension_data|comprehension_other|comprehension_severe")]
-d[, has__symptoms     := rowSums(.SD), .SDcols = patterns("^has_symptoms_")]
+d[, has__symptoms    := rowSums(.SD), .SDcols = patterns("^has_symptoms_")]
 d[, know__health_score      := rowMeans(.SD), .SDcols = patterns("know_age|know_infected_all_ab|know_death_total|know_symptoms_perc")]
 d[, belief__efficiency:= rowMeans(.SD),.SDcols=patterns("belief_eff|belief_5")]
 d[, belief__local     := rowMeans(.SD), .SDcols = patterns("belief_local")]
