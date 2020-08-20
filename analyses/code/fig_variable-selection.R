@@ -14,13 +14,13 @@ source("setup_figures.R")
 varsel_plot(vs, stats=c('elpd', 'rmse')) +
   labs(title = "Variable numbers without cross-validation",
   subtitle = "Sum of log predictive densities (ELPD) and RMSE")
-ggsave("../figures/variable-selection-nvariables-no-cv.png")
+ggsave("../figures/variable-selection-nvariables-no-cv.png", width = .w, height = .h)
 
 # With Cross-validation - ELPD and RMSE in relation to full model
 varsel_plot(cvs, stats = c('elpd', 'rmse'), deltas=TRUE) +
   labs(title = "Variable numbers without cross-validation",
   subtitle = "Sum of log predictive densities (ELPD) and RMSE relative to best-fitting model")
-ggsave("../figures/variable-selection-nvariables-after-cv.png")
+ggsave("../figures/variable-selection-nvariables-after-cv.png", width = .w, height = .h)
 
 
 # The most-relevant predictors ----------------------------------------------
@@ -30,7 +30,7 @@ mcmc_areas(as.matrix(proj)) +
   labs(
     title="Most relevant variables from cross-validation",
     subtitle = paste("Cross-validation suggests top", nvar, "of variables"))
-ggsave("../figures/variable-selection-after-cv.png")
+ggsave("../figures/variable-selection-after-cv.png", width = .w, height = .h)
 
 
 ind <- 1:15 # n most relevant variables
@@ -40,4 +40,4 @@ mcmc_areas(as.matrix(fit),
   labs(
     title="More variables without the n from cross-validation",
     subtitle = paste("Top", max(ind), "of variables"))
-ggsave("../figures/variable-selection.png", height = 10)
+ggsave("../figures/variable-selection.png", height = .w*1.5, , width = .w)
