@@ -30,7 +30,7 @@ mcmc_areas(as.matrix(proj)) +
   labs(
     title="Most relevant variables from cross-validation",
     subtitle = paste("Cross-validation suggests top", nvar, "of variables"))
-ggsave("../figures/variable-selection-after-cv.png", width = .w, height = .h)
+ggsave("../figures/variables-ordered-by-selection-based-on-cv.png", width = .w, height = .h)
 
 
 ind <- 1:15 # n most relevant variables
@@ -40,4 +40,4 @@ mcmc_areas(as.matrix(fit),
   labs(
     title="More variables without the n from cross-validation",
     subtitle = paste("Top", max(ind), "of variables"))
-ggsave("../figures/variable-selection.png", height = .w*1.5, , width = .w)
+ggsave("../figures/variables-ordered-by-selection.png", height = .w*1.5, , width = .w)
