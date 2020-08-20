@@ -107,3 +107,13 @@ calc_svo_angle <- function(d) {
    d[, svo_given := rowMeans(.SD) - 50, .SDcols = patterns("svo_given")]
    return(d[, atan(svo_given/svo_kept) * 180 / pi])
 }
+
+# dictionary holding factor labels in correct order
+factor_dict <- list(
+   data_quality = c(
+      "Stimme gar nicht zu",
+      "Stimme eher nicht zu",
+      "Neutral",
+      "Stimme eher zu",
+      "Stimme voll zu")
+)

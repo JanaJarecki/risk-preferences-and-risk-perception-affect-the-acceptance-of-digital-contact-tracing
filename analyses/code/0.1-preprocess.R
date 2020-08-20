@@ -91,17 +91,26 @@ d[wealth_num_1_text=="8ooo", wealth_num_1_text := "8000"]
 d[community_1_text=="350Ã¼", community_1_text := "3500"]
 d[community_1_text=="2â\200\230500", community_1_text := "2500"]
 
-# Transform and impute values -------------------------------------------------
-# Impute income, wealth, community size if sbjct only gave categorical rsponse
-d$income_imputed <- as.numeric(d$income_num_1_text)
-dict <- data.table(income_cat=0:9, new=c(NA,100*c(5,15,25,35,45,55,65,75,85)))
-d[income_num==0, income_imputed := dict[copy(.SD),on=.(income_cat), x.new]]
-d$wealth_imputed <- as.numeric(d$wealth_num_1_text)
-dict <- data.table(wealth_cat=0:8,new=c(NA,1000*c(0,12.5,37.5,75,150,350,750,1500)))
-d[wealth_num==0, wealth_imputed := dict[copy(.SD), on=.(wealth_cat), x.new]]
+
+# Impute variables ------------------------------------------------------------
+# Community size is imputed based on the mean of the category
 d$community_imputed <- as.numeric(d$community_1_text)
 dict <- data.table(community_cat=0:5,new=c(NA,250,7500,25000,75000,200000))
 d[community==2, community_imputed := dict[copy(.SD),on=.(community_cat),x.new]]
+# Income
+# * Categorical as mean of the categories: 0-1000 = 500, etc,
+# * Missing income by Conditional Multiple Imputation in the mic package
+#   but we will handle this step using the 'mice' package in the analyses
+d$income_imputed <- as.numeric(d$income_num_1_text)
+dict <- data.table(income_cat=0:9, new=c(NA,100*c(5,15,25,35,45,55,65,75,85)))
+d[income_num==0, income_imputed := dict[copy(.SD),on=.(income_cat), x.new]]
+sum(is.na(d$income_imputed)) # 140 missing values
+# Wealth
+# * is imputed like income based on mean and if missing based on mic
+d$wealth_imputed <- as.numeric(d$wealth_num_1_text)
+dict <- data.table(wealth_cat=0:8,new=c(NA,1000*c(0,12.5,37.5,75,150,350,750,1500)))
+d[wealth_num==0, wealth_imputed := dict[copy(.SD), on=.(wealth_cat), x.new]]
+sum(is.na(d$wealth_imputed)) # 175 missing values
 
 
 
