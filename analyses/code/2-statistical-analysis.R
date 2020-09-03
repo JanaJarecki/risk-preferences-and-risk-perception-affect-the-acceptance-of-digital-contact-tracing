@@ -12,7 +12,6 @@ if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentCont
 # Load data ---------------------------------------------------------------
 d <- fread("../../data/processed/data.csv")
 
-
 # Factors -------------------------------------------------------------------
 fac <- c("has_work", "income_loss", "is_infected", "was_infected")
 d[, (fac) := lapply(.SD, factor, labels=c("no", "yes")), .SDcols = fac]
@@ -21,12 +20,12 @@ d[, female := factor(female, labels = c("male", "female", "no response"))]
 
 
 # Model predictor selection --------------------------------------------------
-# using leave-one-out cross-validation and Lasso (L1) penalization
-dep_variable <- "accept_index"
-indep_variables <- c("perc_risk_health", "perc_risk_data", "perc_risk_econ", "seek_risk_general", "seek_risk_health", "seek_risk_data", "seek_risk_economy", "honhum_score", "svo_angle", "iwah_community", "iwah_swiss", "iwah_world")
+dep_var <- "accept_index"
+dep_var <- "comply_index"
+indep_vars <- c("perc_risk_health", "perc_risk_data", "perc_risk_econ", "seek_risk_general", "seek_risk_health", "seek_risk_data", "seek_risk_economy", "honhum_score", "svo_angle", "iwah_community", "iwah_swiss", "iwah_world")
 # Note: only uing 'has_work', not 'had_work', because correlation = 0.80
-control_variables <- c("safebehavior_score", "know_health_score", "know_econ", "female", "age", "education", "community_imputed", "household", "was_infected", "is_infected", "has_symptoms", "income_imputed", "wealth_imputed", "has_work", "income_loss", "homeoffice", "policy_score", "mhealth_score", "tech_score", "compreh_score")
-d <- d[, .SD, .SDcols = c(dep_variable, indep_variables, control_variables)]
+contr_vars <- c("safebehavior_score", "know_health_score", "know_econ", "female", "age", "education", "community_imputed", "household", "was_infected", "is_infected", "has_symptoms", "income_imputed", "wealth_imputed", "has_work", "income_loss", "homeoffice", "policy_score", "mhealth_score", "tech_score", "compreh_score")
+d <- d[, .SD, .SDcols = c(dep_var, indep_vars, contr_vars)]
 
 
 # Impute missing income and wealth variables ----------------------------------
@@ -38,8 +37,8 @@ d[, wealth_imputed := fifelse(is.na(wealth_imputed), median(wealth_imputed,na.rm
 
 # Standardize variables -------------------------------------------------------
 formula <- reformulate(
-  termlabels = c(indep_variables, control_variables),
-  response = dep_variable)
+  termlabels = c(indep_vars, contr_vars),
+  response = dep_var)
 sobj <- standardize(formula = formula, d)
 # Important:
 # 'sobj$data' must be used as data from here on
@@ -47,11 +46,12 @@ sobj <- standardize(formula = formula, d)
 
 
 # Variable selection procedure -----------------------------------------------
+# using leave-one-out cross-validation and Lasso (L1) penalization
 # 1. Setup
 n <- nrow(sobj$data) # 757
 nc <- ncol(sobj$data) # 33
 # Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
-p0 <- length(indep_variables) # prior guess: number of relevant variables
+p0 <- length(indep_vars) # prior guess: number of relevant variables
 tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (notice that stan_glm will automatically scale this by sigma)
 prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
 
@@ -60,7 +60,7 @@ prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regul
 # file.remove("fit_full.rds") # if you want to re-fit the model, run this
 fit <- brm(formula = formula, family = gaussian(), data = sobj$data,
   prior = prior_coeff, save_all_pars = TRUE, sample_prior = "yes",
-  file = "fit_full", iter = 8000)
+  file = paste0("fitted_models/", dep_var, "_fit_full"), iter = 8000)
 # @todo update model fitting because of errors!
 # @body
 # Warning messages:     
@@ -78,23 +78,31 @@ fit <- brm(formula = formula, family = gaussian(), data = sobj$data,
 #   * 1 for control vars
 betas <- grep("^b", parnames(fit), value=TRUE)[-1]
 penalty <- rep(1, length(betas))
-penalty[match(indep_variables, gsub("b_", "", betas))] <- 0
+penalty[match(indep_vars, gsub("b_", "", betas))] <- 0
+
+# Optional
 # Forward search & Lasso L1-penalty to find variable order (Tran et al., 2012)
-vs <- varsel(
-  fit,
-  method = "L1",
-  penalty = penalty
-)
-vs$vind # variables ordered as they enter during the search
+# vs <- varsel(fit,
+#   method = "L1",
+#   penalty = penalty)
+# vs$vind # variables ordered as they enter during the search
+
 
 # 3.b) Perform variable selection using cross-validation
-cvs <- cv_varsel(
-  fit,
+cvs <- cv_varsel(fit,
   method = "L1",
   penalty = penalty)
-saveRDS(cvs, "variable_selection.rds")
+saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection.rds"))
+
 # model size suggested by the program
-nvar <- suggest_size(cvs) # 16
+nvar <- suggest_size(cvs)
+
+
+
+
+
+
+
 
 
 # ==========================================================================

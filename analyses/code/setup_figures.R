@@ -4,10 +4,10 @@
 # ==========================================================================
 pacman::p_load(ggplot2, patchwork, ggsci)
 pacman::p_load_gh("janajarecki/themejj")
-theme_set(themejj())
+theme_set(themejj(base_size = 14))
 
 .w <- 7 # width of all plots
-.h <- 5 # height of all plots
+.h <- 7 # height of all plots
 
 # Color-blind friendly colors --------------------------------------------
 colors <- c(
@@ -32,14 +32,17 @@ variable_labels <- c(
   seek_risk_general = "General Risk Seeking",
   seek_risk_health = "Health Risk Seeking",
   seek_risk_data = "Data-Security Risk Seeking",
+  seek_risk_economy = "Economic Risk Seeking",
+  # econ is correct, need to re-run models.
   seek_risk_econ = "Economic Risk Seeking",
   honhum_score = "Honesty-Humility Personality",
   svo_angle = "Social-Value-Orientation",
   iwah_community = "Identification-Community",
-  iwah_swiss = "Identification-Switzerland",
   iwah_world = "Identification-World",
-  compreh_score = "Comprehension-of-Tracing",
-  policy_score = "Agreement-with-Policies",
-  tech_score = "Affinity-to-Technology")
+  compreh_score = "Comprehension",
+  policy_score = "Policy-Support",
+  tech_score = "Technology-Affinity",
+  age = "Age"
+)
 
 message("Defined vector 'colors', `color_schemes` and 'variable_labels'.")

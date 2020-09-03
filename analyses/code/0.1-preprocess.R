@@ -31,7 +31,7 @@ drop <- c("status", "ipaddress", "recordeddate", "recipientlastname", "recipient
 d <- d[, !drop, with = FALSE]
 # Rename variables
 setnames(d, c("responseid", "duration (in seconds)"), c("id", "duration_seconds"))
-setnames(d, c("risk_domain_1", "risk_domain_2", "risk_domain_3", "risk_general_1"), paste0("seek_risk_", c("health", "data", "economy", "general")))
+setnames(d, c("risk_domain_1", "risk_domain_2", "risk_domain_3", "risk_general_1"), paste0("seek_risk_", c("health", "data", "econ", "general")))
 setcolorder(d, "id")
 # Spelling error in wealth variable names
 setnames(d, gsub("wealtch", "wealth", names(d)))

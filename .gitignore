@@ -2,4 +2,4 @@ data/raw/
 consentforms/
 
 # ignore too large variable selection
-variable_selection.rds
+*_variable_selection.rds
