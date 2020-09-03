@@ -1,2 +1,9 @@
 data/raw/
 consentforms/
+
+#only work on overleaf on the text!
+manuscript/
+!manuscript/*.svg
+
+# ignore too large variable selection
+variable_selection.rds

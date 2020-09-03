@@ -194,7 +194,6 @@ fwrite(d, "../../data/processed/data.csv")
 # Exclusion report -----------------------------------------------------------
 excluded <- rbindlist(lapply(excluded, as.data.table), id = "reason")
 excluded <- dcast(excluded, V1 ~ reason, value.var = "reason")
-cat("\n---------------------------",
-   "Exclusion Report\n"
+cat("\nExclusion Report\n"
    )
 print(as.matrix(excluded[, list(Count=.N), c(names(excluded)[-1])]), na.print = "", quote=F, row.names=F)
