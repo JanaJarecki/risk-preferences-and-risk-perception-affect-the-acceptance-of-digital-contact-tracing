@@ -6,7 +6,7 @@ pacman::p_load(projpred, bayesplot, data.table)
 source("setup_figures.R")
 
 # Load variable selection result
-cvs <- readRDS("variable_selection.rds")
+cvs <- readRDS("variable_selection.rds") # file not on github, too large
 nvar <- suggest_size(cvs)
 
 
@@ -57,6 +57,6 @@ social    <- plot_group(vars = "^honhum|^iwah|^svo",title="Social Preferences")
 other     <- plot_group(
   vars=grep("^per|^see|^ho|^iw|^sv",names(cvs$vind[1:nvar]),invert=T, value=T),
   title = "Other Variables")
-
-risk_perc + risk_seek + social + other
+# usig ?patchwork magic
+risk_perc + risk_seek + social + other +plot_annotation(tag_levels = "A")
 ggsave("../figures/fig_mcmc_areas.pdf", width = .w, height = .h)
