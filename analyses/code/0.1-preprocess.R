@@ -66,7 +66,7 @@ d[, know_econ := recode_dict[copy(.SD), on=.(old=know_econ), x.new]]
 
 
 
-# Recode variables -----------------------------------------------------------
+# Replace values -----------------------------------------------------------
 # Replace values of variable that were not shown
 d$household_kids  <- ifelse(is.na(d$household_kids), 0, d$household_kids)
 # `income_loss` only shown if had_work == 1, recode to 0 = no loss of income
@@ -92,29 +92,29 @@ d[community_1_text=="350Ã¼", community_1_text := "3500"]
 d[community_1_text=="2â\200\230500", community_1_text := "2500"]
 
 
+
 # Impute variables ------------------------------------------------------------
 # Community size is imputed based on the mean of the category
 d$community_imputed <- as.numeric(d$community_1_text)
 dict <- data.table(community_cat=0:5,new=c(NA,250,7500,25000,75000,200000))
 d[community==2, community_imputed := dict[copy(.SD),on=.(community_cat),x.new]]
 # Income
-# * Categorical as mean of the categories: 0-1000 = 500, etc,
-# * Missing income by Conditional Multiple Imputation in the mic package
-#   but we will handle this step using the 'mice' package in the analyses
+# Categorical responses imputed by mean of the categories: 0-1000 = 500, etc,
 d$income_imputed <- as.numeric(d$income_num_1_text)
 dict <- data.table(income_cat=0:9, new=c(NA,100*c(5,15,25,35,45,55,65,75,85)))
 d[income_num==0, income_imputed := dict[copy(.SD),on=.(income_cat), x.new]]
-sum(is.na(d$income_imputed)) # 140 missing values
+sum(is.na(d$income_imputed)) # Still 140 missing values
 # Wealth
-# * is imputed like income based on mean and if missing based on mic
+# Imputed like income based on mean
 d$wealth_imputed <- as.numeric(d$wealth_num_1_text)
 dict <- data.table(wealth_cat=0:8,new=c(NA,1000*c(0,12.5,37.5,75,150,350,750,1500)))
 d[wealth_num==0, wealth_imputed := dict[copy(.SD), on=.(wealth_cat), x.new]]
-sum(is.na(d$wealth_imputed)) # 175 missing values
+sum(is.na(d$wealth_imputed)) #  Still 175 missing values
 
 
 
-# Transform the knowledge of corona symptoms iinto correct or wrong
+# Transform values --------------------------------------------------------
+# The knowledge of corona symptoms into correct or wrong
 calc_perc_correct <- function(x) {
    # Calculation takes into account true pos and true neg symptoms
    symptoms_correct <- c(1, 2, 3, 4, 5, 10)
@@ -125,10 +125,7 @@ calc_perc_correct <- function(x) {
    return(mean(c(true_positive, !false_negative)))
 }
 d[, know_symptoms_perc := calc_perc_correct(know_symptoms), by = id]
-
-
-
-# Normalize variables ---------------------------------------------------------
+# Normalize values
 norm_range <- function(x) {
    (x - min(x)) / (max(x) - min(x))
 }
@@ -149,6 +146,7 @@ d$perc_risk_severe <- scale(d$perc_risk_severe)
 d[, accept_index := rowMeans(.SD), .SDcols = patterns("^acc_")]
 d[, comply_index := rowMeans(.SD), .SDcols = patterns("^com_")]
 d[, vaccine_index := rowMeans(.SD), .SDcols = patterns("^vacc_")]
+
 
 
 
