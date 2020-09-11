@@ -15,15 +15,16 @@ proj <- project(cvs, nv = nvar, ns = 1000)
 # Hypothesis tests ---------------------------------------------------------
 # Normal prior
 m <- as.matrix(proj)
-prior <- distribution_normal(nrow(m), mean = 0, sd = 1)
+prior <- distribution_normal(nrow(m), mean = 0, sd = .1)
 prior <- as.matrix(prior)[, rep(1,ncol(m))]
 colnames(prior) <- colnames(m)
 
 # Test Hypothesis about positive, negative, null effect by BF
-hyp_pos <- c("perc_risk_health", "perc_risk_econ", "seek_risk_data", "honhum_score", "svo_angle", "iwah_community", "iwah_world")
+hyp_pos <- c("perc_risk_health", "perc_risk_econ", "seek_risk_data")
+  #"honhum_score", "svo_angle", "iwah_community", "iwah_world")
 bf_pos <- bayesfactor_parameters(m[, hyp_pos], prior[, hyp_pos], direction=">")
 
-hyp_neg <- c("perc_risk_data", "seek_risk_general", "seek_risk_health", "seek_risk_economy")
+hyp_neg <- c("perc_risk_data", "seek_risk_general", "seek_risk_health", "seek_risk_econ")
 bf_neg <- bayesfactor_parameters(m[, hyp_neg], prior[, hyp_neg], direction="<")
 
 hyp_null <- setdiff(colnames(m)[-c(1, ncol(m))], c(hyp_pos, hyp_neg))
@@ -72,4 +73,5 @@ tab[, c("group", "predictorf", "y", "ymin", "ymax", "predictionf", "BF_f")] %>%
   collapse_rows(1, latex_hline = "major") %>% 
   add_header_above(c(" " = 2, "Estimates " = 3)) %>% 
   kable_styling() %>%
-  writeLines(con = paste0("../tables/", dep_var, "_estimates.tex"))
+  writeLines(con = paste0("../tables/", dep_var, "_estimates_no_social.tex"))
+

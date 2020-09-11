@@ -11,7 +11,7 @@ dep_var <- "accept_index" # or: "comply_index"
 
 # Load files ---------------------------------------------------------------
 # File is not on github, it is too large
-cvs <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection.rds"))
+cvs <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection_no_.rds"))
 nvar <- suggest_size(cvs)
 
 
@@ -57,12 +57,14 @@ plot_group <- function(vars, title, ylabels = variable_labels) {
 # Plot IVs --------------------------------------------------------------------
 risk_perc <- plot_group(vars = "^perc", title = "Risk Perceptions")
 risk_seek <- plot_group(vars = "^seek", title = "Risk-Seeking Preferences")
+
 social    <- plot_group(vars = "^honhum|^iwah|^svo",title="Social Preferences")
+
 other     <- plot_group(
   vars=grep("^per|^see|^ho|^iw|^sv",names(cvs$vind[1:nvar]),invert=T, value=T),
   title = "Other Variables")
 # usig ?patchwork magic
-risk_perc + risk_seek + social + other +
+risk_perc + risk_seek + other +
   plot_annotation(
     title = paste("Effects on", ifelse(dep_var == "comply_index", "Compliance with", "Acceptance of"), "Contact Tracing"),
     tag_levels = "A")

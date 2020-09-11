@@ -16,12 +16,18 @@ dep_var <- "accept_index"
 # Load data ---------------------------------------------------------------
 d <- fread("../../data/processed/data.csv")
 
-
-# Factors -------------------------------------------------------------------
+# Preprocess ----------------------------------------------------------------
+# Factors
 fac <- c("has_work", "income_loss", "is_infected", "was_infected")
 d[, (fac) := lapply(.SD, factor, labels=c("no", "yes")), .SDcols = fac]
 d[, homeoffice := factor(homeoffice, labels = c("no", "yes", "partially"))]
 d[, female := factor(female, labels = c("male", "female", "no response"))]
+# Impute missing income and wealth
+# d[, summary(.SD), .SDcols=c("income_imputed", "wealth_imputed")] #140,175 NA
+d[, income_imputed := fifelse(is.na(income_imputed), median(income_imputed, na.rm=T), income_imputed)]
+d[, wealth_imputed := fifelse(is.na(wealth_imputed), median(wealth_imputed,na.rm=T), income_imputed)]
+# @todo use 'mic' package to do imputation based on better stats technique
+
 
 
 # Model predictor selection --------------------------------------------------
@@ -30,12 +36,6 @@ indep_vars <- c("perc_risk_health", "perc_risk_data", "perc_risk_econ", "seek_ri
 contr_vars <- c("safebehavior_score", "know_health_score", "know_econ", "female", "age", "education", "community_imputed", "household", "was_infected", "is_infected", "has_symptoms", "income_imputed", "wealth_imputed", "has_work", "income_loss", "homeoffice", "policy_score", "mhealth_score", "tech_score", "compreh_score")
 d <- d[, .SD, .SDcols = c(dep_var, indep_vars, contr_vars)]
 
-
-# Impute missing income and wealth variables ----------------------------------
-# d[, summary(.SD), .SDcols=c("income_imputed", "wealth_imputed")] #140,175 NA
-d[, income_imputed := fifelse(is.na(income_imputed), median(income_imputed, na.rm=T), income_imputed)]
-d[, wealth_imputed := fifelse(is.na(wealth_imputed), median(wealth_imputed,na.rm=T), income_imputed)]
-# @todo use 'mic' package to do imputation based on better stats technique
 
 
 # Standardize variables -------------------------------------------------------
@@ -81,8 +81,15 @@ fit <- brm(formula = formula, family = gaussian(), data = sobj$data,
 # to find out why this is a problem and how to eliminate them.                                            
 # 3: Examine the pairs() plot to diagnose sampling problems
 
+# Remove effect of the social dimension
+fit2 <- update(fit,
+  formula. = ~ . - honhum_score - svo_angle - iwah_community - iwah_world,
+  file = paste0("fitted_models/", dep_var, "_fit_no_social"))
 
-# 3.a) Perform variable selection on training data
+
+# Variable selection ----------------------------------------------------------
+# Note: use `fit` or `fit2`
+
 # Penalty of 0 = var is selected first, Inf = var is never selected
 #   * 0 for independent vars that are theoretically motivated
 #   * 1 for control vars
@@ -99,11 +106,14 @@ penalty[match(indep_vars, gsub("b_", "", betas))] <- 0
 # vs$vind # variables ordered as they enter during the search
 
 
-# 3.b) Perform variable selection using cross-validation
-cvs <- cv_varsel(fit,
-  method = "L1",
-  penalty = penalty)
+# Variable selection using cross-validation
+# Full lmodel
+cvs <- cv_varsel(fit, method = "L1", penalty = penalty)
 saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection.rds"))
+# Excluding social variables
+cvs <- cv_varsel(fit2, method = "L1", penalty = penalty)
+saveRDS(cvs,
+  paste0("fitted_models/", dep_var, "_variable_selection_no_social.rds"))
 
 # model size suggested by the program
 nvar <- suggest_size(cvs)
