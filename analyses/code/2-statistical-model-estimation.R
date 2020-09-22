@@ -17,6 +17,8 @@ dep_var <- "accept_index"
 d <- fread("../../data/processed/data.csv")
 
 # Preprocess ----------------------------------------------------------------
+# IWAH difference score
+d[, iwah_diff_score := iwah_community - iwah_world]
 # Factors
 fac <- c("has_work", "income_loss", "is_infected", "was_infected")
 d[, (fac) := lapply(.SD, factor, labels=c("no", "yes")), .SDcols = fac]
@@ -31,7 +33,7 @@ d[, wealth_imputed := fifelse(is.na(wealth_imputed), median(wealth_imputed,na.rm
 
 
 # Model predictor selection --------------------------------------------------
-indep_vars <- c("perc_risk_health", "perc_risk_data", "perc_risk_econ", "seek_risk_general", "seek_risk_health", "seek_risk_data", "seek_risk_econ", "honhum_score", "svo_angle", "iwah_community", "iwah_world")
+indep_vars <- c("perc_risk_health", "perc_risk_data", "perc_risk_econ", "seek_risk_general", "seek_risk_health", "seek_risk_data", "seek_risk_econ", "honhum_score", "svo_angle", "iwah_diff_score")
 # Note: using only 'has_work', not 'had_work', because they correlate too much
 contr_vars <- c("safebehavior_score", "know_health_score", "know_econ", "female", "age", "education", "community_imputed", "household", "was_infected", "is_infected", "has_symptoms", "income_imputed", "wealth_imputed", "has_work", "income_loss", "homeoffice", "policy_score", "mhealth_score", "tech_score", "compreh_score")
 d <- d[, .SD, .SDcols = c(dep_var, indep_vars, contr_vars)]
@@ -52,7 +54,7 @@ sobj <- standardize(formula = formula, d)
 # using leave-one-out cross-validation and Lasso (L1) penalization
 # 1. Setup
 n <- nrow(sobj$data) # 757
-nc <- ncol(sobj$data) # 33
+nc <- ncol(sobj$data) # 31
 # Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
 p0 <- length(indep_vars) # prior guess: number of relevant variables
 tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
@@ -68,28 +70,13 @@ fit <- brm(formula = formula, family = gaussian(), data = sobj$data,
   iter = 8000,
   seed = 42,
   control = list(
-    adapt_delta = 0.9 # because horseshoe prior prone to divergent transitions
+    adapt_delta = 0.99 # because horseshoe prior prone to divergent transitions
   ),
   file = paste0("fitted_models/", dep_var, "_fit_full"))
-# @todo update model fitting because of errors!
-# @body
-# Warning messages:     
-# 1: In system(paste(CXX, ARGS), ignore.stdout = TRUE, ignore.stderr = TRUE):
-#   'C:/rtools40/usr/mingw_/bin/g++' not found
-# 2: There were 101 divergent transitions after warmup. See                                               
-# http://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup
-# to find out why this is a problem and how to eliminate them.                                            
-# 3: Examine the pairs() plot to diagnose sampling problems
 
-# Remove effect of the social dimension
-fit2 <- update(fit,
-  formula. = ~ . - honhum_score - svo_angle - iwah_community - iwah_world,
-  file = paste0("fitted_models/", dep_var, "_fit_no_social"))
 
 
 # Variable selection ----------------------------------------------------------
-# Note: use `fit` or `fit2`
-
 # Penalty of 0 = var is selected first, Inf = var is never selected
 #   * 0 for independent vars that are theoretically motivated
 #   * 1 for control vars
@@ -97,7 +84,8 @@ betas <- grep("^b", parnames(fit), value=TRUE)[-1]
 penalty <- rep(1, length(betas))
 penalty[match(indep_vars, gsub("b_", "", betas))] <- 0
 # betas[penalty==0] # check var penalty: ok
-
+cvs <- cv_varsel(fit, method = "L1", penalty = penalty)
+saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection.rds"))
 # Optional
 # Forward search & Lasso L1-penalty to find variable order (Tran et al., 2012)
 # vs <- varsel(fit,
@@ -106,17 +94,20 @@ penalty[match(indep_vars, gsub("b_", "", betas))] <- 0
 # vs$vind # variables ordered as they enter during the search
 
 
-# Variable selection using cross-validation
-# Full lmodel
-cvs <- cv_varsel(fit, method = "L1", penalty = penalty)
-saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection.rds"))
-# Excluding social variables
-cvs <- cv_varsel(fit2, method = "L1", penalty = penalty)
-saveRDS(cvs,
-  paste0("fitted_models/", dep_var, "_variable_selection_no_social.rds"))
 
-# model size suggested by the program
-nvar <- suggest_size(cvs)
+# Excluding the social variables ---------------------------------------------
+# Update reference model
+# file.remove(paste0("fitted_models/", dep_var, "_fit_no_social.rds"))
+fit2 <- update(fit,
+  formula. = ~ . - honhum_score - svo_angle - iwah_diff_score,
+  file = paste0("fitted_models/", dep_var, "_fit_no_social"))
+# Update variable selection with penalty
+betas <- grep("^b", parnames(fit2), value=TRUE)[-1]
+penalty <- rep(1, length(betas))
+penalty[match(indep_vars, gsub("b_", "", betas))] <- 0
+cvs <- cv_varsel(fit2, method = "L1", penalty = penalty)
+saveRDS(cvs,paste0("fitted_models/",dep_var,"_variable_selection_no_social.rds"))
+
 
 
 
