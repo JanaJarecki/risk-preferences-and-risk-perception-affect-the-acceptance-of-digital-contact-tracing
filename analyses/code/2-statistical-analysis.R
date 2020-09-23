@@ -4,7 +4,7 @@
 # ==========================================================================
 if (!require(pacman)) install.packages("pacman")
 # Load (and install missing) packages
-pacman::p_load(data.table, brms, projpred, bayesplot, standardize, mice)
+pacman::p_load(data.table, brms, projpred, bayesplot, standardize, mice, BayesFactor)
 # set working directory to THIS file location (if rstudio)
 if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) }
 
@@ -97,9 +97,18 @@ saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection.rds"))
 # model size suggested by the program
 nvar <- suggest_size(cvs)
 
-
-
-
+# Correlation acceptance vs. compliance
+library(BayesFactor)
+plot(d$accept_index, d$comply_index)
+mean(d$comply_index)
+sd(d$comply_index)
+mean(d$accept_index)
+sd(d$accept_index)
+mean(d$comply_index>=3)
+mean(d$comply_index>=4)
+mean(d$accept_index>=3)
+mean(d$accept_index>=4)
+cor(d$accept_index, d$comply_index)
 
 
 

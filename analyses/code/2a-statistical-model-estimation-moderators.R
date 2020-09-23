@@ -9,8 +9,8 @@ if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentCont
 
 
 # Setup: which depenent var -----------------------------------------------
-dep_var <- "accept_index"
-# dep_var <- "comply_index"
+#dep_var <- "accept_index"
+dep_var <- "comply_index"
 
 
 # Load data ---------------------------------------------------------------
@@ -90,12 +90,20 @@ fit_all_mod_effective <- brm(formula = formula, family = gaussian(), data = sobj
 
 ### Variable selection for moderator comparison
 ## Done in 2-statistical-model-estimate.R
-cvs_full <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection.rds"))
+#cvs_full <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection.rds"))
+betas <- grep("^b", parnames(fit_all), value=TRUE)[-1]
+penalty <- rep(1, length(betas))
+penalty[match(indep_vars, gsub("b_", "", betas))] <- 0
+cvs_full <- cv_varsel(fit_all, method = "L1", penalty = penalty)
+saveRDS(cvs_full,
+        paste0("fitted_models/", dep_var, "_variable_selection.rds"))
+nvar_local <- suggest_size(cvs_full)
 
 # Model with moderator local
 betas <- grep("^b", parnames(fit_all_mod_local), value=TRUE)[-1]
 penalty <- rep(1, length(betas))
 penalty[match(indep_vars, gsub("b_", "", betas))] <- 0
+#cvs_local <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection_mod_local.rds"))
 cvs_local <- cv_varsel(fit_all_mod_local, method = "L1", penalty = penalty)
 saveRDS(cvs_local,
         paste0("fitted_models/", dep_var, "_variable_selection_mod_local.rds"))
@@ -112,6 +120,13 @@ nvar_effective <- suggest_size(cvs_effective)
 
 ### Select model
 ## Calculate model with suggested variables
+n <- nrow(sobj$data) # 757
+nc <- ncol(sobj$data) # 33
+# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
+p0 <- length(indep_vars) # prior guess: number of relevant variables
+tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
+prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
+
 # Model with all predictors
 cvs_all = readRDS(paste0("fitted_models/", dep_var, "_variable_selection.rds"))
 nvar <- suggest_size(cvs_all)
@@ -222,6 +237,7 @@ fit_all_mod_effective <- brm(formula = formula, family = gaussian(), data = sobj
                              file = paste0("fitted_models/", dep_var, "_fit_full_mod_effective"))
 
 # Compare BFs
-BF_eff_all <- bayes_factor(fit_reduced_all, fit_all_mod_effective)
+BF_all_eff <- bayes_factor(fit_reduced_all, fit_all_mod_effective)
 BF_all_loc <- bayes_factor(fit_reduced_all, fit_all_mod_local)
 BF_eff_loc <- bayes_factor(fit_all_mod_effective, fit_all_mod_local)
+
