@@ -9,7 +9,7 @@ if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentCont
 
 
 # Setup: which depenent var -----------------------------------------------
-#dep_var <- "accept_index"
+dep_var <- "accept_index"
 dep_var <- "comply_index"
 
 
@@ -17,6 +17,8 @@ dep_var <- "comply_index"
 d <- fread("../../data/processed/data.csv")
 
 # Preprocess ----------------------------------------------------------------
+# IWAH difference score
+d[, iwah_diff_score := iwah_community - iwah_world]
 # Factors
 fac <- c("has_work", "income_loss", "is_infected", "was_infected")
 d[, (fac) := lapply(.SD, factor, labels=c("no", "yes")), .SDcols = fac]
@@ -29,14 +31,24 @@ d[, wealth_imputed := fifelse(is.na(wealth_imputed), median(wealth_imputed,na.rm
 # @todo use 'mic' package to do imputation based on better stats technique
 
 # Model predictor selection --------------------------------------------------
-indep_vars <- c("perc_risk_health", "perc_risk_data", "perc_risk_econ", "seek_risk_general", "seek_risk_health", "seek_risk_data", "seek_risk_econ", "honhum_score", "svo_angle", "iwah_community", "iwah_world")
+indep_vars <- c("perc_risk_health", "perc_risk_data", "perc_risk_econ", "seek_risk_general", "seek_risk_health", "seek_risk_data", "seek_risk_econ", "honhum_score", "svo_angle", "iwah_diff_score")
 # Note: using only 'has_work', not 'had_work', because they correlate too much
 contr_vars <- c("safebehavior_score", "know_health_score", "know_econ", "female", "age", "education", "community_imputed", "household", "was_infected", "is_infected", "has_symptoms", "income_imputed", "wealth_imputed", "has_work", "income_loss", "homeoffice", "policy_score", "mhealth_score", "tech_score", "compreh_score")
+
 
 # Moderator selection --------------------------------------------------
 mod_vars <- c("belief_efficiency", "belief_local")
 
 d <- d[, .SD, .SDcols = c(dep_var, indep_vars, contr_vars, mod_vars)]
+
+
+## Calculate model with suggested variables
+n <- nrow(sobj$data) # 757
+nc <- ncol(sobj$data) # 33
+# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
+p0 <- length(indep_vars) # prior guess: number of relevant variables
+tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
+prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
 
 
 ### Moderators Variant 1: Fit all models -> Do variable selection.
@@ -45,6 +57,7 @@ formula <- reformulate(
   termlabels = c(indep_vars, contr_vars),
   response = dep_var)
 sobj <- standardize(formula = formula, d)
+file.remove(paste0("fitted_models/", dep_var, "_fit_full.rds"))
 fit_all <- brm(formula = formula, family = gaussian(), data = sobj$data,
                prior = prior_coeff,
                save_all_pars = TRUE, sample_prior = "yes",
@@ -61,6 +74,7 @@ formula <- reformulate(
   termlabels = c(indep_vars, contr_vars, predictors_mod_local),
   response = dep_var)
 sobj <- standardize(formula = formula, d)
+#file.remove(paste0("fitted_models/", dep_var, "_fit_full_mod_local.rds"))
 fit_all_mod_local <- brm(formula = formula, family = gaussian(), data = sobj$data,
                          prior = prior_coeff,
                          save_all_pars = TRUE, sample_prior = "yes",
@@ -72,11 +86,12 @@ fit_all_mod_local <- brm(formula = formula, family = gaussian(), data = sobj$dat
                          file = paste0("fitted_models/", dep_var, "_fit_full_mod_local"))
 
 # Fit full model with effectiveness moderator
-predictors_mod_effective <- paste(indep_vars[1:11], mod_vars[1], sep=":")
+predictors_mod_effective <- paste(indep_vars, mod_vars[1], sep=":")
 formula <- reformulate(
   termlabels = c(indep_vars, contr_vars, predictors_mod_effective),
   response = dep_var)
 sobj <- standardize(formula = formula, d)
+#file.remove(paste0("fitted_models/", dep_var, "_fit_full_mod_effective.rds"))
 fit_all_mod_effective <- brm(formula = formula, family = gaussian(), data = sobj$data,
                              prior = prior_coeff,
                              save_all_pars = TRUE, sample_prior = "yes",
@@ -97,7 +112,7 @@ penalty[match(indep_vars, gsub("b_", "", betas))] <- 0
 cvs_full <- cv_varsel(fit_all, method = "L1", penalty = penalty)
 saveRDS(cvs_full,
         paste0("fitted_models/", dep_var, "_variable_selection.rds"))
-nvar_local <- suggest_size(cvs_full)
+nvar_full <- suggest_size(cvs_full)
 
 # Model with moderator local
 betas <- grep("^b", parnames(fit_all_mod_local), value=TRUE)[-1]
@@ -119,13 +134,6 @@ saveRDS(cvs_effective,
 nvar_effective <- suggest_size(cvs_effective)
 
 ### Select model
-## Calculate model with suggested variables
-n <- nrow(sobj$data) # 757
-nc <- ncol(sobj$data) # 33
-# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
-p0 <- length(indep_vars) # prior guess: number of relevant variables
-tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
-prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
 
 # Model with all predictors
 cvs_all = readRDS(paste0("fitted_models/", dep_var, "_variable_selection.rds"))
@@ -135,6 +143,7 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
+#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_all.rds"))
 fit_reduced_all <- brm(formula = formula, family = gaussian(), data = sobj$data,
                        prior = prior_coeff,
                        save_all_pars = TRUE, sample_prior = "yes",
@@ -153,6 +162,7 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
+#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_local.rds"))
 fit_reduced_local <- brm(formula = formula, family = gaussian(), data = sobj$data,
                          prior = prior_coeff,
                          save_all_pars = TRUE, sample_prior = "yes",
@@ -172,6 +182,7 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
+#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_effective.rds"))
 fit_reduced_effective <- brm(formula = formula, family = gaussian(), data = sobj$data,
                              prior = prior_coeff,
                              save_all_pars = TRUE, sample_prior = "yes",
@@ -218,7 +229,7 @@ fit_all_mod_local <- brm(formula = formula, family = gaussian(), data = sobj$dat
 
 
 # Moderator Effectiveness
-predictors_mod <- paste(predictors_all[1:11], mod_vars[1], sep=":")
+predictors_mod <- paste(predictors_all[1:10], mod_vars[1], sep=":")
 
 formula <- reformulate(
   termlabels = c(predictors_all, predictors_mod),
