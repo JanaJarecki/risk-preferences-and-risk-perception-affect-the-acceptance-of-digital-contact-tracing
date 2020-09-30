@@ -2,6 +2,8 @@
 # Statistical Modeling
 # Author: Jana B. Jarecki
 # ==========================================================================
+rm(list=ls())
+
 if (!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, brms, projpred, bayesplot, standardize, mice)
 # set working directory to THIS file location (if rstudio)
@@ -38,8 +40,6 @@ indep_vars <- c("perc_risk_health", "perc_risk_data", "perc_risk_econ", "seek_ri
 contr_vars <- c("safebehavior_score", "know_health_score", "know_econ", "female", "age", "education", "community_imputed", "household", "was_infected", "is_infected", "has_symptoms", "income_imputed", "wealth_imputed", "has_work", "income_loss", "homeoffice", "policy_score", "mhealth_score", "tech_score", "compreh_score")
 d <- d[, .SD, .SDcols = c(dep_var, indep_vars, contr_vars)]
 
-
-
 # Standardize variables -------------------------------------------------------
 formula <- reformulate(
   termlabels = c(indep_vars, contr_vars),
@@ -47,8 +47,6 @@ formula <- reformulate(
 sobj <- standardize(formula = formula, d)
 # Important:
 # 'sobj$data' must be used as data from here on
-
-
 
 # Variable selection procedure -----------------------------------------------
 # using leave-one-out cross-validation and Lasso (L1) penalization
@@ -59,11 +57,15 @@ nc <- ncol(sobj$data) # 31
 p0 <- length(indep_vars) # prior guess: number of relevant variables
 tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
 prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
-
+#prior_coeff <- set_prior("normal(0,10)", class = "b") # regularized horseshoe prior
 
 # 2. Fit full model
 # If you want to re-fit the model, run next line
-# file.remove(paste0("fitted_models/", dep_var, "_fit_full.rds"))
+formula <- reformulate(
+  termlabels = c(indep_vars, contr_vars),
+  response = dep_var)
+sobj <- standardize(formula = formula, d)
+file.remove(paste0("fitted_models/", dep_var, "_fit_full.rds"))
 fit <- brm(formula = formula, family = gaussian(), data = sobj$data,
   prior = prior_coeff,
   save_all_pars = TRUE, sample_prior = "yes",
@@ -74,47 +76,145 @@ fit <- brm(formula = formula, family = gaussian(), data = sobj$data,
   ),
   file = paste0("fitted_models/", dep_var, "_fit_full"))
 
-
-
 # Variable selection ----------------------------------------------------------
 # Penalty of 0 = var is selected first, Inf = var is never selected
 #   * 0 for independent vars that are theoretically motivated
 #   * 1 for control vars
 betas <- grep("^b", parnames(fit), value=TRUE)[-1]
 penalty <- rep(1, length(betas))
-penalty[match(indep_vars, gsub("b_", "", betas))] <- 0
+penalty[match(c(indep_vars), gsub("b_", "", betas))] <- 0
 # betas[penalty==0] # check var penalty: ok
 cvs <- cv_varsel(fit, method = "L1", penalty = penalty)
-saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection.rds"))
+saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection_all.rds"))
 # Optional
 # Forward search & Lasso L1-penalty to find variable order (Tran et al., 2012)
 # vs <- varsel(fit,
 #   method = "L1",
 #   penalty = penalty)
 # vs$vind # variables ordered as they enter during the search
+# Fit reduced model
+cvs <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection_all.rds"))
+nvar <- suggest_size(cvs)
+predictors_selected <- names(cvs$vind[1:nvar])
+formula <- reformulate(
+  termlabels = predictors_selected,
+  response = dep_var)
+sobj <- standardize(formula = formula, d)
+n <- nrow(sobj$data) # 757
+nc <- ncol(sobj$data) # 31
+# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
+p0 <- length(indep_vars) # prior guess: number of relevant variables
+tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
+prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
+file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_all.rds"))
+fit_reduced_all <- brm(formula = formula, family = gaussian(), data = sobj$data,
+                       prior = prior_coeff,
+                       save_all_pars = TRUE, sample_prior = "yes",
+                       iter = 8000,
+                       seed = 42,
+                       control = list(
+                         adapt_delta = 0.9 # because horseshoe prior prone to divergent transitions
+                       ),
+                       file = paste0("fitted_models/", dep_var, "_fit_reduced_all"))
 
-
-
-# Excluding the social variables ---------------------------------------------
-# Update reference model
-# file.remove(paste0("fitted_models/", dep_var, "_fit_no_social.rds"))
-fit2 <- update(fit,
-  formula. = ~ . - honhum_score - svo_angle - iwah_diff_score,
-  file = paste0("fitted_models/", dep_var, "_fit_no_social"))
-# Update variable selection with penalty
-betas <- grep("^b", parnames(fit2), value=TRUE)[-1]
+# Variable selection no social ----------------------------------------------------------
+betas <- grep("^b", parnames(fit), value=TRUE)[-1]
 penalty <- rep(1, length(betas))
-penalty[match(indep_vars, gsub("b_", "", betas))] <- 0
-cvs <- cv_varsel(fit2, method = "L1", penalty = penalty)
-saveRDS(cvs,paste0("fitted_models/",dep_var,"_variable_selection_no_social.rds"))
+penalty[match(indep_vars[1:7], gsub("b_", "", betas))] <- 0
+cvs <- cv_varsel(fit, method = "L1", penalty = penalty)
+saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection_no_social.rds"))
+# Fit reduced model
+cvs <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection_no_social.rds"))
+nvar <- suggest_size(cvs)
+predictors_selected <- names(cvs$vind[1:nvar])
+formula <- reformulate(
+  termlabels = predictors_selected,
+  response = dep_var)
+sobj <- standardize(formula = formula, d)
+n <- nrow(sobj$data) # 757
+nc <- ncol(sobj$data) # 31
+# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
+p0 <- length(indep_vars) # prior guess: number of relevant variables
+tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
+prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
+file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_social.rds"))
+fit_reduced_no_social <- brm(formula = formula, family = gaussian(), data = sobj$data,
+                       prior = prior_coeff,
+                       save_all_pars = TRUE, sample_prior = "yes",
+                       iter = 8000,
+                       seed = 42,
+                       control = list(
+                         adapt_delta = 0.9 # because horseshoe prior prone to divergent transitions
+                       ),
+                       file = paste0("fitted_models/", dep_var, "_fit_reduced_no_social"))
+
+# Variable selection no risk seek ----------------------------------------------------------
+betas <- grep("^b", parnames(fit), value=TRUE)[-1]
+penalty <- rep(1, length(betas))
+penalty[match(c(indep_vars[1:3], indep_vars[8:10]), gsub("b_", "", betas))] <- 0
+cvs <- cv_varsel(fit, method = "L1", penalty = penalty)
+saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection_no_riskseek.rds"))
+# Fit reduced model
+cvs <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection_no_riskseek.rds"))
+nvar <- suggest_size(cvs)
+predictors_selected <- names(cvs$vind[1:nvar])
+formula <- reformulate(
+  termlabels = predictors_selected,
+  response = dep_var)
+sobj <- standardize(formula = formula, d)
+n <- nrow(sobj$data) # 757
+nc <- ncol(sobj$data) # 31
+# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
+p0 <- length(indep_vars) # prior guess: number of relevant variables
+tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
+prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
+file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_riskseek.rds"))
+fit_reduced_no_riskseek <- brm(formula = formula, family = gaussian(), data = sobj$data,
+                             prior = prior_coeff,
+                             save_all_pars = TRUE, sample_prior = "yes",
+                             iter = 8000,
+                             seed = 42,
+                             control = list(
+                               adapt_delta = 0.9 # because horseshoe prior prone to divergent transitions
+                             ),
+                             file = paste0("fitted_models/", dep_var, "_fit_reduced_no_riskseek"))
 
 
+# Variable selection no risk perception ----------------------------------------------------------
+betas <- grep("^b", parnames(fit), value=TRUE)[-1]
+penalty <- rep(1, length(betas))
+penalty[match(indep_vars[4:10], gsub("b_", "", betas))] <- 0
+cvs <- cv_varsel(fit, method = "L1", penalty = penalty)
+saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection_no_riskperc.rds"))
+# Fit reduced model
+cvs <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection_no_riskperc.rds"))
+nvar <- suggest_size(cvs)
+predictors_selected <- names(cvs$vind[1:nvar])
+formula <- reformulate(
+  termlabels = predictors_selected,
+  response = dep_var)
+sobj <- standardize(formula = formula, d)
+n <- nrow(sobj$data) # 757
+nc <- ncol(sobj$data) # 31
+# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
+p0 <- length(indep_vars) # prior guess: number of relevant variables
+tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
+prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
+file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_riskperc.rds"))
+fit_reduced_no_riskperc <- brm(formula = formula, family = gaussian(), data = sobj$data,
+                               prior = prior_coeff,
+                               save_all_pars = TRUE, sample_prior = "yes",
+                               iter = 8000,
+                               seed = 42,
+                               control = list(
+                                 adapt_delta = 0.9 # because horseshoe prior prone to divergent transitions
+                               ),
+                               file = paste0("fitted_models/", dep_var, "_fit_reduced_no_riskperc"))
 
 
-
-
-
-
+BF_all_no_social = bayes_factor(fit_reduced_all, fit_reduced_no_social)
+BF_all_no_riskseek = bayes_factor(fit_reduced_all, fit_reduced_no_riskseek)
+BF_all_no_riskperc = bayes_factor(fit_reduced_all, fit_reduced_no_riskperc)
 
 
 # ==========================================================================
