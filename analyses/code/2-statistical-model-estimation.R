@@ -63,7 +63,7 @@ formula <- reformulate(
   termlabels = c(indep_vars, contr_vars),
   response = dep_var)
 sobj <- standardize(formula = formula, d)
-# file.remove(paste0("fitted_models/", dep_var, "_fit_full.rds"))
+file.remove(paste0("fitted_models/", dep_var, "_fit_full.rds"))
 fit <- brm(formula = formula, family = gaussian(), data = sobj$data,
   prior = prior_coeff,
   save_all_pars = TRUE, sample_prior = "yes",
@@ -98,7 +98,7 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
-#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_all.rds"))
+file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_all.rds"))
 fit_reduced_all <- brm(formula = formula, family = gaussian(), data = sobj$data,
                        prior = prior_coeff,
                        save_all_pars = TRUE, sample_prior = "yes",
@@ -123,7 +123,7 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
-#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_social.rds"))
+file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_social.rds"))
 fit_reduced_no_social <- brm(formula = formula, family = gaussian(), data = sobj$data,
                        prior = prior_coeff,
                        save_all_pars = TRUE, sample_prior = "yes",
@@ -148,7 +148,7 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
-#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_riskseek.rds"))
+file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_riskseek.rds"))
 fit_reduced_no_riskseek <- brm(formula = formula, family = gaussian(), data = sobj$data,
                              prior = prior_coeff,
                              save_all_pars = TRUE, sample_prior = "yes",
@@ -159,30 +159,6 @@ fit_reduced_no_riskseek <- brm(formula = formula, family = gaussian(), data = so
                              ),
                              file = paste0("fitted_models/", dep_var, "_fit_reduced_no_riskseek"))
 
-# Variable selection no social ----------------------------------------------------------
-betas <- grep("^b", parnames(fit), value=TRUE)[-1]
-penalty <- rep(1, length(betas))
-penalty[match(indep_vars[1:7], gsub("b_", "", betas))] <- 0
-cvs <- cv_varsel(fit, method = "L1", penalty = penalty)
-saveRDS(cvs, paste0("fitted_models/", dep_var, "_variable_selection_no_social.rds"))
-# Fit reduced model
-cvs <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection_no_social.rds"))
-nvar <- suggest_size(cvs)
-predictors_selected <- names(cvs$vind[1:nvar])
-formula <- reformulate(
-  termlabels = predictors_selected,
-  response = dep_var)
-sobj <- standardize(formula = formula, d)
-#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_social.rds"))
-fit_reduced_no_social <- brm(formula = formula, family = gaussian(), data = sobj$data,
-                             prior = prior_coeff,
-                             save_all_pars = TRUE, sample_prior = "yes",
-                             iter = 8000,
-                             seed = 42,
-                             control = list(
-                               adapt_delta = 0.9 # because horseshoe prior prone to divergent transitions
-                             ),
-                             file = paste0("fitted_models/", dep_var, "_fit_reduced_no_social"))
 
 # Variable selection no risk perception ----------------------------------------------------------
 betas <- grep("^b", parnames(fit), value=TRUE)[-1]
@@ -198,7 +174,7 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
-#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_riskperc.rds"))
+file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_riskperc.rds"))
 fit_reduced_no_riskperc <- brm(formula = formula, family = gaussian(), data = sobj$data,
                                prior = prior_coeff,
                                save_all_pars = TRUE, sample_prior = "yes",
