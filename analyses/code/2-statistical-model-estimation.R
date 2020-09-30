@@ -2,7 +2,7 @@
 # Statistical Modeling
 # Author: Jana B. Jarecki
 # ==========================================================================
-if (!require(pacman)) tall.packages("pacman")
+if (!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, brms, projpred, bayesplot, standardize, mice)
 # set working directory to THIS file location (if rstudio)
 if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) }
