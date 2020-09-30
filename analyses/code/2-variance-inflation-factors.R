@@ -2,7 +2,7 @@
 # Statistical Modeling
 # Author: Jana B. Jarecki
 # ==========================================================================
-pacman::p_load(data.table, standardize, car)
+pacman::p_load(data.table, standardize, car, projpred)
 if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) }
 
 
@@ -31,11 +31,18 @@ d[, wealth_imputed := fifelse(is.na(wealth_imputed), median(wealth_imputed,na.rm
 
 
 # Model predictor selection --------------------------------------------------
-indep_vars <- c("perc_risk_health", "perc_risk_data", "perc_risk_econ", "seek_risk_general", "seek_risk_health", "seek_risk_data", "seek_risk_econ", "honhum_score", "svo_angle", "iwah_diff_score")
-# Note: using only 'has_work', not 'had_work', because they correlate too much
-contr_vars <- c("safebehavior_score", "know_health_score", "know_econ", "female", "age", "education", "community_imputed", "household", "was_infected", "is_infected", "has_symptoms", "income_imputed", "wealth_imputed", "has_work", "income_loss", "homeoffice", "policy_score", "mhealth_score", "tech_score", "compreh_score")
-d <- d[, .SD, .SDcols = c(dep_var, indep_vars, contr_vars)]
+cv <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection.rds"))
+var <- names(cv$vind)[1:suggest_size(cv)]
+d <- d[, .SD, .SDcols = c(dep_var, var)]
 
-# Frequentistic model
+# Standardize variables -------------------------------------------------------
+formula <- reformulate(
+  termlabels = var,
+  response = dep_var)
+sobj <- standardize(formula = formula, d)
+# Important:
+# 'sobj$data' must be used as data from here on
+
+# VIF -------------------------------------------------------------------------
 fit <- lm(formula = formula, data = sobj$data)
 vif(fit)
