@@ -2,6 +2,8 @@
 # Statistical Modeling
 # Author: Jana B. Jarecki
 # ==========================================================================
+rm(list=ls())
+
 if (!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, brms, projpred, bayesplot, standardize, mice)
 # set working directory to THIS file location (if rstudio)
@@ -39,10 +41,10 @@ contr_vars <- c("safebehavior_score", "know_health_score", "know_econ", "female"
 d <- d[, .SD, .SDcols = c(dep_var, indep_vars, contr_vars)]
 
 # Standardize variables -------------------------------------------------------
-#formula <- reformulate(
-#  termlabels = c(indep_vars, contr_vars),
-#  response = dep_var)
-#sobj <- standardize(formula = formula, d)
+formula <- reformulate(
+  termlabels = c(indep_vars, contr_vars),
+  response = dep_var)
+sobj <- standardize(formula = formula, d)
 # Important:
 # 'sobj$data' must be used as data from here on
 
