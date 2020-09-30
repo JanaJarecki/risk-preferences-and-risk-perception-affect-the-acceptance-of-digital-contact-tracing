@@ -131,22 +131,28 @@ fit_reduced_no_social <- update(fit,
   file = paste0("fitted_models/", dep_var, "_fit_reduced_no_social"))
 
 # Variable selection no risk seek ---------------------------------------------
+#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_riskseek.rds"))
 formula <- select_vars("no_riskseek")
 sobj <- standardize(formula = formula, d)
-fit_reduced_no_social <- update(fit,
+fit_reduced_no_riskseek <- update(fit,
   formula=formula, newdata=sobj$data, prior=prior(normal(0,10), class="b"),
   file = paste0("fitted_models/", dep_var, "_fit_reduced_no_riskseek"))
 
 
 # Variable selection no risk perception --------------------------------------
+#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_riskperc.rds"))
 formula <- select_vars("no_riskperc")
 sobj <- standardize(formula = formula, d)
-fit_reduced_no_social <- update(fit,
+fit_reduced_no_riskperc <- update(fit,
   formula=formula, newdata=sobj$data, prior=prior(normal(0,10), class=b),
   file = paste0("fitted_models/", dep_var, "_fit_reduced_no_riskperc"))
 
 
 # Compare models -------------------------------------------------------------
-BF_all_no_social = bayes_factor(fit_reduced_all, fit_reduced_no_social)
-BF_all_no_riskseek = bayes_factor(fit_reduced_all, fit_reduced_no_riskseek)
-BF_all_no_riskperc = bayes_factor(fit_reduced_all, fit_reduced_no_riskperc)
+BF_no_social_all = bayes_factor(fit_reduced_no_social, fit_reduced_all)
+BF_no_riskseek_all = bayes_factor(fit_reduced_no_riskseek, fit_reduced_all)
+BF_no_riskperc_all = bayes_factor(fit_reduced_no_riskperc, fit_reduced_all)
+BF_no_social_no_riskseek = bayes_factor(fit_reduced_no_social, fit_reduced_no_riskseek)
+BF_no_social_no_riskperc = bayes_factor(fit_reduced_no_social, fit_reduced_no_riskperc)
+
+
