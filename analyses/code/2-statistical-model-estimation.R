@@ -100,6 +100,12 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
+n <- nrow(sobj$data) # 757
+nc <- ncol(sobj$data) # 31
+# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
+p0 <- length(indep_vars) # prior guess: number of relevant variables
+tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
+prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
 file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_all.rds"))
 fit_reduced_all <- brm(formula = formula, family = gaussian(), data = sobj$data,
                        prior = prior_coeff,
@@ -125,6 +131,12 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
+n <- nrow(sobj$data) # 757
+nc <- ncol(sobj$data) # 31
+# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
+p0 <- length(indep_vars) # prior guess: number of relevant variables
+tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
+prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
 file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_social.rds"))
 fit_reduced_no_social <- brm(formula = formula, family = gaussian(), data = sobj$data,
                        prior = prior_coeff,
@@ -150,6 +162,12 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
+n <- nrow(sobj$data) # 757
+nc <- ncol(sobj$data) # 31
+# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
+p0 <- length(indep_vars) # prior guess: number of relevant variables
+tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
+prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
 file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_riskseek.rds"))
 fit_reduced_no_riskseek <- brm(formula = formula, family = gaussian(), data = sobj$data,
                              prior = prior_coeff,
@@ -176,6 +194,12 @@ formula <- reformulate(
   termlabels = predictors_selected,
   response = dep_var)
 sobj <- standardize(formula = formula, d)
+n <- nrow(sobj$data) # 757
+nc <- ncol(sobj$data) # 31
+# Piironen and Vehtari (2017): the prior for the global shrinkage parameter is defined from the prior guess for the number of variables that matter
+p0 <- length(indep_vars) # prior guess: number of relevant variables
+tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
+prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
 file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_no_riskperc.rds"))
 fit_reduced_no_riskperc <- brm(formula = formula, family = gaussian(), data = sobj$data,
                                prior = prior_coeff,
