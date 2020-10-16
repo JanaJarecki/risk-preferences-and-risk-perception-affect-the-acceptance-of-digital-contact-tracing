@@ -118,7 +118,7 @@ sum(is.na(d$wealth_imputed)) #  Still 175 missing values
 calc_perc_correct <- function(x) {
    # Calculation takes into account true pos and true neg symptoms
    symptoms_correct <- c(1, 2, 3, 4, 5, 10)
-   symptoms_wrong <- c(6, 7, 8, 9, 10)
+   symptoms_wrong <- c(6, 7, 8, 9)
    x <- as.numeric(unlist(strsplit(x, ",")))
    true_positive <- symptoms_correct %in% x
    false_negative <- symptoms_wrong %in% x
@@ -135,6 +135,8 @@ d$raw_know_death_total <- d$know_death_total
 d$know_age             <- 1-norm_range(abs(d$know_age - 65))
 d$know_infected_all_ab <- 1-norm_range(abs(d$know_infected_all_ab-32500))
 d$know_death_total     <- 1-norm_range(abs(d$know_death_total - 1750))
+d$raw_perc_infected_next7 <- d$perc_infected_next7
+d$raw_perc_infected_last7 <- d$perc_infected_last7
 d$perc_infected_next7 <- scale(d$perc_infected_next7)
 d$perc_infected_last7 <- scale(d$perc_infected_last7)
 d$perc_risk_severe <- scale(d$perc_risk_severe)
