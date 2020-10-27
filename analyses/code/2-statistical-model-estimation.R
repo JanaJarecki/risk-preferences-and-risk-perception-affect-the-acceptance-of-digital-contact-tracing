@@ -13,9 +13,9 @@ if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentCont
 # dep_var <- "accept_index"
 # dep_var <- "comply_index"
 # dep_var <- "safebehavior_score"
-dep_var <- "policy_score"
+# dep_var <- "policy_score"
 # dep_var <- "iwah_diff_score
-# dep_var <- "compreh_score"
+dep_var <- "compreh_score"
 
 
 # Load data ---------------------------------------------------------------
