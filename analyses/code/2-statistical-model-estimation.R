@@ -13,9 +13,9 @@ if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentCont
 # dep_var <- "accept_index"
 # dep_var <- "comply_index"
 # dep_var <- "safebehavior_score"
-# dep_var <- "policy_score"
+dep_var <- "policy_score"
 # dep_var <- "iwah_diff_score
-dep_var <- "compreh_score"
+# dep_var <- "compreh_score"
 
 
 # Load data ---------------------------------------------------------------
@@ -117,10 +117,10 @@ select_vars <- function(x, use_IV = T) {
   # vs$vind # variables ordered as they enter during the search  
   nvar <- suggest_size(cvs)
   predictors_selected <- names(cvs$vind[1:nvar])
-  #dirty hack I comment out ...
-  #predictors_selected <- c(predictors_selected[predictors_selected!="femalefemale"], "female")
-  #predictors_selected <- c(predictors_selected[predictors_selected!="has_workyes"], "has_work")
-  #predictors_selected <- c(predictors_selected[predictors_selected!="homeofficeno"], "homeoffice")
+  for (i in contr_vars) {
+    j <- grep(i, predictors_selected)
+    predictors_selected[j] <- i
+  }
 
   return(reformulate(
     termlabels = predictors_selected,
@@ -169,6 +169,9 @@ BF_no_riskseek_all = bayes_factor(fit_reduced_no_riskseek, fit_reduced_all)
 BF_no_riskperc_all = bayes_factor(fit_reduced_no_riskperc, fit_reduced_all)
 BF_no_social_no_riskseek = bayes_factor(fit_reduced_no_social, fit_reduced_no_riskseek)
 BF_no_social_no_riskperc = bayes_factor(fit_reduced_no_social, fit_reduced_no_riskperc)
+
+
+
 
 # Fit reduced model for other interesting DVs without penalties -----------------------------------------------------------
 #file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_all.rds"))
