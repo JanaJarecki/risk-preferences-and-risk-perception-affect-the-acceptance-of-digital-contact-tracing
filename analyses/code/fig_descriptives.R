@@ -9,12 +9,13 @@ d[, gender := fcase(
   female == 0, " Male",
   female == 1, "Female",
   female == 2, NA_character_)]
+d[, age_bin := cut(age, 6, dig.lab=2)]
 d[education <= 2, education := 2]
 d[, education_f := factor(education, labels = c("No/Obligatory", "Vocational", "Higher", "College", "University"), ordered = T)]
 
 d[, safety_mask := safety_mask/100]
-to_plot <- c("mhealth_score", "compreh_score", "policy_score", "accept_index", "comply_index")
-labels <- c("Mental Health", "Comprehension", "Policy Support", "Acceptance", "Compliance")
+to_plot <- c("mhealth_score", "policy_score", "compreh_score", "accept_index", "comply_index")
+labels <- c("Mental Health", "Policy Support", "Comprehension", "Acceptance", "Compliance")
 
 plot_it <- function(xstring, xtitle) {
   p1 <- ggplot(melt(d, id = c("id", xstring), measure = to_plot, na.rm=TRUE)[!is.na(get(xstring))],
@@ -46,8 +47,9 @@ plot_it <- function(xstring, xtitle) {
 
 (plot_it("age_bin", "Age bin") + plot_layout(tag_level = "new")) /
 (plot_it("gender", "") + plot_layout(tag_level = 'new')) /
-(plot_it("education_f", "Education") + plot_layout(tag_level = "new")) +
-plot_layout(nrow = 3) +
-plot_annotation(tag_levels = c("A", "1"))
+#(plot_it("education_f", "Education") + plot_layout(tag_level = "new")) +
+plot_layout(nrow = 2) +
+plot_annotation(tag_levels = c("A", "1")) &
+theme(plot.margin = margin(0.2, unit = "lines"))
 
-ggsave("../figures/fig_descriptive.pdf", w = 8, h = 6.9)
+ggsave("../figures/fig_descriptive.pdf", w = 9, h = 4.3, scale = 1.2)

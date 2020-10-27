@@ -3,7 +3,6 @@
 # Author: Jana B. Jarecki
 # ==========================================================================
 rm(list=ls())
-
 if (!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, brms, projpred, bayesplot, standardize, mice)
 # set working directory to THIS file location (if rstudio)
@@ -12,7 +11,7 @@ if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentCont
 
 # Setup: which depenent var -----------------------------------------------
 dep_var <- "accept_index"
-# dep_var <- "comply_index"
+dep_var <- "comply_index"
 
 
 # Load data ---------------------------------------------------------------
@@ -43,6 +42,7 @@ indep_vars <- c(perc_risk_vars, seek_risk_vars, social_vars)
 contr_vars <- c("safebehavior_score", "know_health_score", "know_econ", "female", "age", "education", "community_imputed", "household", "was_infected", "is_infected", "has_symptoms", "income_imputed", "wealth_imputed", "has_work", "income_loss", "homeoffice", "policy_score", "mhealth_score", "tech_score", "compreh_score")
 d <- d[, .SD, .SDcols = c(dep_var, indep_vars, contr_vars)]
 
+
 # Standardize variables -------------------------------------------------------
 formula <- reformulate(
   termlabels = c(indep_vars, contr_vars),
@@ -50,6 +50,7 @@ formula <- reformulate(
 sobj <- standardize(formula = formula, d)
 # Important:
 # 'sobj$data' must be used as data from here on
+
 
 # Variable selection procedure -----------------------------------------------
 # using leave-one-out cross-validation and Lasso (L1) penalization
@@ -60,7 +61,6 @@ nc <- ncol(sobj$data) # 31
 p0 <- length(indep_vars) # prior guess: number of relevant variables
 tau0 <- p0/(nc-p0) * 1/sqrt(n) # scale for tau (stan_glm scales this by sigma)
 prior_coeff <- set_prior(horseshoe(scale_global = tau0, scale_slab = 1)) # regularized horseshoe prior
-#prior_coeff <- set_prior("normal(0,10)", class = "b") # regularized horseshoe prior
 
 # 2. Fit full model
 # If you want to re-fit the model, run next line

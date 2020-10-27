@@ -2,78 +2,60 @@
 # Statistical Analyses of the models
 # Author: Jana B. Jarecki
 # ==========================================================================
-pacman::p_load(data.table, bayestestR, projpred, logspline, see, ggdist, kable, kableExtra, magrittr)
-# set working directory to THIS file location (if rstudio)
+pacman::p_load(data.table, bayestestR,, logspline, see, ggdist, kable, kableExtra, magrittr)
 if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) }
 
 # Setup --------------------------------------------------------------------
-dep_var <- "accept_index" # or "comply_index"
-cvs <- readRDS(paste0("fitted_models/", dep_var, "_variable_selection.rds"))
-# Generate the projected reduced model
-nvar <- suggest_size(cvs)
-proj <- project(cvs, nv = nvar, ns = 1000)
+fit_accept <- readRDS("fitted_models/accept_index_fit_reduced_all.rds")
+fit_comply <- readRDS("fitted_models/comply_index_fit_reduced_all.rds")
 
-# Hypothesis tests ---------------------------------------------------------
-# Normal prior
-m <- as.matrix(proj)
-prior <- distribution_normal(nrow(m), mean = 0, sd = .1)
-prior <- as.matrix(prior)[, rep(1,ncol(m))]
-colnames(prior) <- colnames(m)
-
-# Test Hypothesis about positive, negative, null effect by BF
-set.seed(42)
-hyp_pos <- c("perc_risk_health", "perc_risk_econ", "seek_risk_data", "honhum_score", "svo_angle", "iwah_diff_score")
-bf_pos <- bayesfactor_parameters(m[, hyp_pos], prior[, hyp_pos], direction=">")
-hyp_neg <- c("perc_risk_data", "seek_risk_general", "seek_risk_health", "seek_risk_econ")
-bf_neg <- bayesfactor_parameters(m[, hyp_neg], prior[, hyp_neg], direction="<")
-hyp_null <- setdiff(colnames(m)[-c(1, ncol(m))], c(hyp_pos, hyp_neg))
-bf_null <- bayesfactor_parameters(m[, hyp_null], prior[, hyp_null], direction = "=")
+# Test hypothesis
+h <- c("perc_risk_health > 0", "perc_risk_data < 0", "perc_risk_econ > 0", "seek_risk_general < 0", "seek_risk_health < 0", "seek_risk_data > 0", "honhum_score > 0", "svo_angle > 0")
 
 
 # Table 1 ---------------------------------------------------------------------
-tab <- rbindlist(apply(m, 2, median_hdci), id="predictor")
-BFs <- data.table(
-  predictor = c(hyp_pos, hyp_neg, hyp_null),
-  prediction = c(rep("+", length(hyp_pos)), rep("-", length(hyp_neg)), rep("./.", length(hyp_null))),
-  BF = c(bf_pos$BF, bf_neg$BF, bf_null$BF))
-tab <- tab[BFs, on = "predictor"]
+tab <- merge(
+  hypothesis(fit_accept, c(h, "seek_risk_econ < 0", "iwah_diff_score > 0"))[[1]],
+  hypothesis(fit_comply, h)[[1]],
+  by = "Hypothesis",
+  suffix = c("_a", "_c"),
+  all = T)
+
 
 # Fomat table for print -------------------------------------------------------
 source("setup_figures.R") # generates variable labels
-tab[, predictorf := factor(predictor, levels = names(variable_labels), labels = variable_labels, ordered = TRUE)]
+tab <- as.data.table(tab)
+tab[, predictorf := factor(gsub("\\(|\\).*", "", Hypothesis), levels = names(variable_labels), labels = variable_labels, ordered = TRUE)]
 tab <- tab[order(predictorf)]
 tab[, predictorf := gsub("-", " ", tstrsplit(predictorf, " ")[[1]])]
-tab[, predictionf := paste("$", prediction, "$")]
+tab[, predictionf := paste("$", predictorf, "$")]
 tab[, group := fcase(
-  grepl("^perc", predictor), "Risk Perception",
-  grepl("^seek", predictor), "Risk-seeking Preference",
-  grepl("svo|iwa|honh", predictor), "Social Preferences",
+  grepl("perc", Hypothesis), "Risk Perception",
+  grepl("seek", Hypothesis), "Risk-seeking Preference",
+  grepl("svo|iwa|honh", Hypothesis), "Social Preferences",
   default = "Other"
 )]
-tab[, BF_f := fcase(
-  BF > 100, "$>$ 1000",
-  BF < 1/100, "$<$ 1/1000",
-  BF > 10, sprintf("%f", BF),
-  BF < 1/10, paste(1, round(1/BF), sep="/"),
-  BF < 10 & BF > 1/10, sprintf("%.2f", BF))]
 
 # If we must we do tidyverse magrittr style
-tab[, c("group", "predictorf", "y", "ymin", "ymax")] %>%
+options(knitr.kable.NA = '--')
+tab[, c("group", "predictorf", "Estimate_a", "CI.Lower_a", "CI.Upper_a", "Estimate_c", "CI.Lower_c", "CI.Upper_c")] %>%
   kable(
     format = "latex",
     digits = 2,
-    align = c("l","l", "r", "r","l"),
-    col.names = c("", "Predictor","Median", "2.5\\%", "97.5\\%"),
+    align = c("l","l", "r", "r","l", "r", "r","l"),
+    col.names = c("Group", "Predictor","Median", "2.5\\%", "97.5\\%", "Median", "2.5\\%", "97.5\\%"),
     booktabs = TRUE,
     escape = FALSE,
     format.args = list(scientific = F),
     label = "tab_results_1",
-    caption = "Effects on the acceptance of contact tracing."
+    caption = "Results of the Bayesian regression: Effects on the acceptance of and compliance with digital contact tracing."
     ) %>%
-  column_spec(1, width = "2cm") %>%
+  column_spec(1, width = "1.8cm") %>%
+  column_spec(2, width = "4.5cm") %>%
   column_spec(3, width = "1cm") %>%
   collapse_rows(1, latex_hline = "major") %>% 
-  add_header_above(c(" " = 2, "Estimates " = 3)) %>% 
+  add_header_above(c(" " = 2, "Acceptance " = 3, "Compliance " = 3)) %>% 
   kable_styling() %>%
-  writeLines(con = paste0("../tables/", dep_var, "_estimates.tex"))
+  add_footnote(label = "Note. CIs are Bayesian credibility intervalls.", notation="none") %>%
+  writeLines(con = paste0("../tables/fullmodel_coef_estimates.tex"))
 
