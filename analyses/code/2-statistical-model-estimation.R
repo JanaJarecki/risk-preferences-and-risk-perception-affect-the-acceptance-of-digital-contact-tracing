@@ -10,8 +10,12 @@ if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentCont
 
 
 # Setup: which depenent var -----------------------------------------------
-dep_var <- "accept_index"
-dep_var <- "comply_index"
+# dep_var <- "accept_index"
+# dep_var <- "comply_index"
+# dep_var <- "safebehavior_score"
+# dep_var <- "policy_score"
+# dep_var <- "iwah_diff_score
+dep_var <- "compreh_score"
 
 
 # Load data ---------------------------------------------------------------
@@ -38,8 +42,10 @@ perc_risk_vars <- paste0("perc_risk_", c("health","data","econ"))
 seek_risk_vars <- paste0("seek_risk_", c("general","health","data","econ"))
 social_vars <- c("honhum_score", "svo_angle", "iwah_diff_score")
 indep_vars <- c(perc_risk_vars, seek_risk_vars, social_vars)
+indep_vars <- indep_vars[indep_vars!=dep_var]
 # Note: using only 'has_work', not 'had_work', because they correlate too much
 contr_vars <- c("safebehavior_score", "know_health_score", "know_econ", "female", "age", "education", "community_imputed", "household", "was_infected", "is_infected", "has_symptoms", "income_imputed", "wealth_imputed", "has_work", "income_loss", "homeoffice", "policy_score", "mhealth_score", "tech_score", "compreh_score")
+contr_vars <- contr_vars[contr_vars!=dep_var]
 d <- d[, .SD, .SDcols = c(dep_var, indep_vars, contr_vars)]
 
 
@@ -81,7 +87,7 @@ fit <- brm(formula = formula, family = gaussian(), data = sobj$data,
 
 # Variable selection ----------------------------------------------------------
 # Function that does variable selection given specification in x
-select_vars <- function(x) {
+select_vars <- function(x, use_IV = T) {
   if (x == "all") indep_vars <- indep_vars
   if (x == "no_social") indep_vars <- c(perc_risk_vars, seek_risk_vars)
   if (x == "no_riskperc") indep_vars <- c(seek_risk_vars, social_vars)
@@ -99,13 +105,22 @@ select_vars <- function(x) {
   if (file.exists(fn)) {
     cvs <- readRDS(fn) 
   } else {
-    cvs <- cv_varsel(fit, method = "L1", penalty = penalty)
+    if (use_IV){
+      cvs <- cv_varsel(fit, method = "L1", penalty = penalty)  
+    } else {
+      cvs <- cv_varsel(fit, method = "L1")  
+    }
+    
     saveRDS(cvs, fn)
   }
 
   # vs$vind # variables ordered as they enter during the search  
   nvar <- suggest_size(cvs)
   predictors_selected <- names(cvs$vind[1:nvar])
+  #dirty hack I comment out ...
+  #predictors_selected <- c(predictors_selected[predictors_selected!="femalefemale"], "female")
+  #predictors_selected <- c(predictors_selected[predictors_selected!="has_workyes"], "has_work")
+  #predictors_selected <- c(predictors_selected[predictors_selected!="homeofficeno"], "homeoffice")
 
   return(reformulate(
     termlabels = predictors_selected,
@@ -155,4 +170,54 @@ BF_no_riskperc_all = bayes_factor(fit_reduced_no_riskperc, fit_reduced_all)
 BF_no_social_no_riskseek = bayes_factor(fit_reduced_no_social, fit_reduced_no_riskseek)
 BF_no_social_no_riskperc = bayes_factor(fit_reduced_no_social, fit_reduced_no_riskperc)
 
+# Fit reduced model for other interesting DVs without penalties -----------------------------------------------------------
+#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_all.rds"))
+formula <- select_vars("all", use_IV=F)
+sobj <- standardize(formula = formula, d)
+fit_reduced_all <- update(fit,
+                          formula=formula, newdata=sobj$data, prior=prior(normal(0,10), class="b"),
+                          file = paste0("fitted_models/", dep_var, "_fit_reduced_all"))
 
+# Todo
+#kable(fit_reduced_all$fit, format = "latex")
+#kable(fit_reduced_all, format = "latex")
+
+
+#iwah_diff_score (World -> community) ==>
+#                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#Intercept              0.20      0.19    -0.16     0.57 1.00    10853    10707
+#age                    0.15      0.04     0.07     0.23 1.00    16093    12864
+#community_imputed     -0.13      0.03    -0.20    -0.06 1.00    20369    12240
+#svo_angle             -0.12      0.03    -0.19    -0.05 1.00    20412    11016
+#household              0.10      0.04     0.03     0.17 1.00    18791    12303
+#mhealth_score         -0.07      0.04    -0.14    -0.00 1.00    18484    12183
+#safebehavior_score    -0.08      0.04    -0.14    -0.01 1.00    20303    12443
+#wealth_imputed         0.08      0.04     0.01     0.15 1.00    20020    11617
+#seek_risk_econ         0.07      0.04    -0.00     0.14 1.00    22078    12072
+#femalefemale          -0.35      0.19    -0.72     0.01 1.00    11036    10214
+#femalemale            -0.20      0.19    -0.56     0.17 1.00    10764    10045
+#has_workyes            0.13      0.04     0.05     0.22 1.00    18672    11839
+
+#comprehension_score ==> 
+#                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#Intercept               0.12      0.05     0.02     0.21 1.00    14967    12343
+#policy_score            0.40      0.03     0.33     0.46 1.00    14008    11812
+#perc_risk_data         -0.14      0.03    -0.21    -0.08 1.00    13960    11579
+#seek_risk_data          0.11      0.03     0.05     0.17 1.00    15929    11657
+#tech_score              0.10      0.03     0.03     0.16 1.00    15282    12015
+#homeofficeno           -0.18      0.05    -0.28    -0.08 1.00    14628    11557
+#homeofficepartially     0.00      0.06    -0.12     0.13 1.00    15520    12121
+
+
+#policy_score ==> 
+#                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+#Intercept             -0.09      0.16    -0.41     0.23 1.00    11304    10478
+#compreh_score          0.37      0.03     0.31     0.43 1.00    17108    11085
+#perc_risk_data        -0.14      0.03    -0.20    -0.07 1.00    16451    12344
+#perc_risk_econ        -0.11      0.03    -0.17    -0.04 1.00    18161    11249
+#seek_risk_general     -0.12      0.04    -0.19    -0.04 1.00    15132    12175
+#mhealth_score         -0.16      0.03    -0.22    -0.10 1.00    19047    10448
+#seek_risk_health      -0.06      0.04    -0.13     0.01 1.00    15037    11930
+#safebehavior_score     0.09      0.03     0.03     0.15 1.00    19111    11637
+#femalefemale           0.20      0.16    -0.13     0.52 1.00    11382    10639
+#femalemale            -0.01      0.16    -0.33     0.31 1.00    11287    10987
