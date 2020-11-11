@@ -11,11 +11,11 @@ if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentCont
 
 # Setup: which depenent var -----------------------------------------------
 # dep_var <- "accept_index"
-# dep_var <- "comply_index"
+dep_var <- "comply_index"
 # dep_var <- "safebehavior_score"
 # dep_var <- "policy_score"
 # dep_var <- "iwah_diff_score
-dep_var <- "compreh_score"
+# dep_var <- "compreh_score"
 
 
 # Load data ---------------------------------------------------------------
@@ -87,7 +87,7 @@ fit <- brm(formula = formula, family = gaussian(), data = sobj$data,
 
 # Variable selection ----------------------------------------------------------
 # Function that does variable selection given specification in x
-select_vars <- function(x, use_IV = T) {
+select_vars <- function(x, use_IV = TRUE) {
   if (x == "all") indep_vars <- indep_vars
   if (x == "no_social") indep_vars <- c(perc_risk_vars, seek_risk_vars)
   if (x == "no_riskperc") indep_vars <- c(seek_risk_vars, social_vars)
@@ -105,7 +105,7 @@ select_vars <- function(x, use_IV = T) {
   if (file.exists(fn)) {
     cvs <- readRDS(fn) 
   } else {
-    if (use_IV){
+    if (use_IV == TRUE){
       cvs <- cv_varsel(fit, method = "L1", penalty = penalty)  
     } else {
       cvs <- cv_varsel(fit, method = "L1")  

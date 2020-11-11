@@ -2,7 +2,7 @@
 # Statistical Analyses of the models
 # Author: Jana B. Jarecki
 # ==========================================================================
-pacman::p_load(data.table, bayestestR,, logspline, see, ggdist, kable, kableExtra, magrittr)
+pacman::p_load(data.table, brms, logspline, see, ggdist, kableExtra, magrittr)
 if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) }
 
 # Setup --------------------------------------------------------------------

@@ -38,8 +38,8 @@ d[, range(as.IDate(startdate))]
 
 d[, describe(accept_index)]
 d[, describe(comply_index)]
-d[, describe(accept_index), by=cut(age,6,ordered_result=T)][order(cut)]
-d[, describe(policy_score), by=cut(age,6,ordered_result=T)][order(cut)]
+d[, describe(accept_index), by=cut(age,6,ordered_result=T,dig.lab=2)][order(cut)]
+d[, describe(policy_score), by=cut(age,6,ordered_result=T,dig.lab=2)][order(cut)]
 d[, describe(policy_score), by=gender]
 
 grep("ef", names(d), value=T)

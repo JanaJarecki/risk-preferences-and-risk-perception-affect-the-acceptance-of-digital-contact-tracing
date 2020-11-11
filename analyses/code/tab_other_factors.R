@@ -1,5 +1,5 @@
 # ==========================================================================
-# Statistical Analyses of the models
+# Tables of Regression Coefficients for Policy Support & Comprehension
 # Author: Jana B. Jarecki
 # ==========================================================================
 pacman::p_load(data.table, kableExtra, magrittr, broom.mixed, dplyr, stringr)
