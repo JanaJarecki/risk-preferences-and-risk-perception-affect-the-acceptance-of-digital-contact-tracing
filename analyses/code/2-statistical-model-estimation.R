@@ -1,15 +1,15 @@
 # ==========================================================================
-# Statistical Modeling
-# Author: Jana B. Jarecki
+# File: statistical-model-estimation.R
+# Estimates the Bayesian regression models
+# Author: Jana B. Jarecki, Rebecca Albrecht
 # ==========================================================================
 rm(list=ls())
 if (!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, brms, projpred, bayesplot, standardize, mice)
-# set working directory to THIS file location (if rstudio)
 if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) }
 
 
-# Setup: which depenent var -----------------------------------------------
+# Setup: which depenent variable to model? ------------------------------------
 # dep_var <- "accept_index"
 dep_var <- "comply_index"
 # dep_var <- "safebehavior_score"
@@ -20,6 +20,7 @@ dep_var <- "comply_index"
 
 # Load data ---------------------------------------------------------------
 d <- fread("../../data/processed/data.csv")
+
 
 # Preprocess ----------------------------------------------------------------
 # IWAH difference score
@@ -33,8 +34,6 @@ d[, female := factor(female, labels = c("male", "female", "no response"))]
 # d[, summary(.SD), .SDcols=c("income_imputed", "wealth_imputed")] #140,175 NA
 d[, income_imputed := fifelse(is.na(income_imputed), median(income_imputed, na.rm=T), income_imputed)]
 d[, wealth_imputed := fifelse(is.na(wealth_imputed), median(wealth_imputed,na.rm=T), income_imputed)]
-# @todo use 'mic' package to do imputation based on better stats technique
-
 
 
 # Model predictor selection --------------------------------------------------
@@ -85,6 +84,7 @@ fit <- brm(formula = formula, family = gaussian(), data = sobj$data,
   ),
   file = paste0("fitted_models/", dep_var, "_fit_full"))
 
+
 # Variable selection ----------------------------------------------------------
 # Function that does variable selection given specification in x
 select_vars <- function(x, use_IV = TRUE) {
@@ -129,7 +129,8 @@ select_vars <- function(x, use_IV = TRUE) {
 
 
 # Fit reduced model -----------------------------------------------------------
-#file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_all.rds"))
+file.remove(paste0("fitted_models/",dep_var,"_variable_selection_",x,".rds"))
+file.remove(paste0("fitted_models/", dep_var, "_fit_reduced_all.rds"))
 formula <- select_vars("all")
 sobj <- standardize(formula = formula, d)
 fit_reduced_all <- update(fit,
@@ -180,10 +181,6 @@ sobj <- standardize(formula = formula, d)
 fit_reduced_all <- update(fit,
                           formula=formula, newdata=sobj$data, prior=prior(normal(0,10), class="b"),
                           file = paste0("fitted_models/", dep_var, "_fit_reduced_all"))
-
-# Todo
-#kable(fit_reduced_all$fit, format = "latex")
-#kable(fit_reduced_all, format = "latex")
 
 
 #iwah_diff_score (World -> community) ==>

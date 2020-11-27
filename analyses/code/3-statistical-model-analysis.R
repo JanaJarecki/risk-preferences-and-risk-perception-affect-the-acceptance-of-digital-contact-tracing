@@ -1,6 +1,7 @@
 # ==========================================================================
+# File: statistical-model-analysis
 # Statistical Analyses of the models
-# Author: Jana B. Jarecki
+# Author: Jana B. Jarecki & Rebecca Albrecht
 # ==========================================================================
 pacman::p_load(data.table, brms, logspline, see, ggdist, kableExtra, magrittr)
 if (rstudioapi::isAvailable()) { setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) }
@@ -36,7 +37,6 @@ tab[, group := fcase(
   default = "Other"
 )]
 
-# If we must we do tidyverse magrittr style
 options(knitr.kable.NA = '--')
 tab[, c("group", "predictorf", "Estimate_a", "CI.Lower_a", "CI.Upper_a", "Estimate_c", "CI.Lower_c", "CI.Upper_c")] %>%
   kable(
@@ -58,4 +58,17 @@ tab[, c("group", "predictorf", "Estimate_a", "CI.Lower_a", "CI.Upper_a", "Estima
   kable_styling() %>%
   add_footnote(label = "Note. CIs are Bayesian credibility intervalls.", notation="none") %>%
   writeLines(con = paste0("../tables/fullmodel_coef_estimates.tex"))
+
+  # Correlation acceptance vs. compliance
+library(BayesFactor)
+plot(d$accept_index, d$comply_index)
+mean(d$comply_index)
+sd(d$comply_index)
+mean(d$accept_index)
+sd(d$accept_index)
+mean(d$comply_index>=3)
+mean(d$comply_index>=4)
+mean(d$accept_index>=3)
+mean(d$accept_index>=4)
+cor(d$accept_index, d$comply_index)
 

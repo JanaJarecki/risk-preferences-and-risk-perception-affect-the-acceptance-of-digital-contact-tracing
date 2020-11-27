@@ -1,3 +1,9 @@
+# ==========================================================================
+# File: demographics.R
+# Prints demographic information
+# Author: Jana B. Jarcki
+# ==========================================================================
+
 # Setup --------------------------------------------------------------------
 if (!require(pacman)) install.packages("pacman")
 pacman::p_load(data.table, psych)
@@ -42,7 +48,6 @@ d[, describe(accept_index), by=cut(age,6,ordered_result=T,dig.lab=2)][order(cut)
 d[, describe(policy_score), by=cut(age,6,ordered_result=T,dig.lab=2)][order(cut)]
 d[, describe(policy_score), by=gender]
 
-grep("ef", names(d), value=T)
 
 # Table demographics ----------------------------------------------------------
 digits <- 2
