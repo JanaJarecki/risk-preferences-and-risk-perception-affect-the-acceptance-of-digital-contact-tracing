@@ -1,7 +1,7 @@
 ---
-title: "Codebook for the data"
+title: "Codebook"
 author: "Elina Lutz"
-date: "01/06/2021"
+date: "01/07/2021"
 output: html_document
 ---
 
@@ -29,7 +29,7 @@ var_label(data$startdate) <- "Date and time the participant started"
 var_label(data$enddate) <- "Date and time the participant finished"
 var_label(data$progress) <- "How far the participant progressed in the study"
 var_label(data$duration_seconds) <- "How long the participant took for the study (in seconds)"
-var_label(data$finished) <- "If the participant finished the study"
+var_label(data$finished) <- "Whether the participant finished the study"
 var_label(data$userlanguage) <- "The language in which the participant processed the study"
 
 # seek_risk
@@ -158,7 +158,7 @@ var_label(data$perc_severe) <- "How many out of 100 people infected with the cor
 
 var_label(data$know_econ) <- "How high do you estimate the economic costs of the new coronavirus for Switzerland? (In billions of CHF. For information: the GDP of Switzerland in 2019 was CHF 699 billion.)"
 var_label(data$know_age) <- "Age is a risk factor for severe courses. At what age does the risk for a severe course increase?"
-var_label(data$know_symptoms) <- "Which of the following pre-existing conditions favor a severe course of the disease caused by the virus? Please tick all the answers that apply. 1 = Gastrointestinal diseases, 2 = Diseases and therapies that weaken the immune system, 3 = Chronic respiratory diseases, 4 = High blood pressure, 5 = Diseases of the liver, 6 = Cancer, 7 = Diabetes, 8 = Cardiovascular diseases, 9 = Nervous disorders (neurological disorders), 10 = Diseases of the kidneys"
+var_label(data$know_symptoms) <- "Which of the following pre-existing conditions favor a severe course of the disease caused by the virus? Please tick all the answers that apply. (1 = Gastrointestinal diseases, 2 = Diseases and therapies that weaken the immune system, 3 = Chronic respiratory diseases, 4 = High blood pressure, 5 = Diseases of the liver, 6 = Cancer, 7 = Diabetes, 8 = Cardiovascular diseases, 9 = Nervous disorders (neurological disorders), 10 = Diseases of the kidneys)"
 
 # safety behavior
 var_label(data$safety_mask) <- "In the last 7 days, how often did you wear a mouth-nose protection in situations where it would have been advisable?"
@@ -237,6 +237,10 @@ var_label(data$iwah_community) <- ""
 var_label(data$iwah_swiss) <- ""
 var_label(data$iwah_world) <- ""
 var_label(data$iwah_diff_score) <- ""
+
+var_label(data$belief_efficiency) <- ""
+var_label(data$belief_local) <- ""
+var_label(data$belief_global) <- ""
 
 var_label(data$svo_angle) <- ""
 var_label(data$policy_score) <- ""
@@ -433,15 +437,15 @@ val_labels(data$education) <- c("Compulsory school not completed" = 1,
                                 "Higher vocational education (diploma of higher vocational school, federal certificate of proficiency, federal diploma)" = 5, 
                                 "University (FH/PH/UH Bachelor, Master, Doctorate)" = 6) # have Jana take a look
 
-val_labels(data$community) <- c("I do not know" = 0,
-                                "Specified (see community_1_text)" = 1)
+val_labels(data$community) <- c("Specified (see community_1_text)" = 1,
+                                "I do not know" = 2)
 
 val_labels(data$community_cat) <- c("Small village (up to 500 inhabitants)" = 1, 
                                     "Large village (up to 10,000 inhabitants)" = 2,
                                     "Small town (up to 50,000 inhabitants)" = 3, 
                                     "City (up to 100,000 inhabitants)" = 4, 
                                     "Big city (from 100,000 inhabitants)" = 5, 
-                                    "I do not know" = 6)
+                                    "I do not know" = 0)
 
 val_labels(data$income_num) <- c("I do not want to specify" = 0,
                                 "Specified (see income_num_1_text)" = 1)
@@ -499,8 +503,6 @@ metadata(data)$creator <- list(
   "@type" = "Person",givenName = "Jana B.", familyName = "Jarecki",
   "@type" = "Person", givenName = "Dominik", familyName = "Meier",
   "@type" = "Person", givenName = "Jörg", familyName = "Rieskamp")
-# is there a nicer way to present the authors?
-# who is a doctor and/or professor?
 # email & affiliation could be added
 
 compact_codebook(data)
