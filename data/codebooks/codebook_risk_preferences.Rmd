@@ -1,30 +1,94 @@
 ---
-title: "Codebook"
+title: "Codebook for data in Albrecht, Jarecki, Meier, & Rieskamp"
 author: "Elina Lutz"
-date: "01/07/2021"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r setup}
+This document contains a codebook explaining the variables and labels of the data file data.csv in the folder data/processed.
+
+```{r setup, echo = FALSE, warning = FALSE, message = FALSE}
+if (!require(pacman)) install.packages("pacman")
+pacman::p_load(data.table, codebook, labelled, sjlabelled, dplyr)
 knitr::opts_chunk$set(
-  warning = TRUE, # show warnings during codebook generation
-  message = TRUE, # show messages during codebook generation
-  error = TRUE, # do not interrupt codebook generation in case of errors,
-                # usually better for debugging
-  echo = FALSE  # whether or not to show R code
+  warning = FALSE,
+  message = FALSE,
+  error = TRUE,
+  echo = FALSE,
+  fig.margin = TRUE,
+  fig.height = 1.4,
+  fig.width = 3,
+  echo = FALSE
 )
-ggplot2::theme_set(ggplot2::theme_bw())
+pander::panderOptions("table.split.table", Inf)
+ggplot2::theme_set(ggthemes::theme_tufte(base_family = "sans", ticks = FALSE))
+```
+
+```{r meta_info}
+# Define a list with information about the authors, affiliation, methods of data collection, and so forth (called meta information)
+meta_info <- list(
+  name = "Risk Preferences and Risk Perception Affect the Acceptance of Digital Contact Tracing",
+  description = "Questionnaire data used to examine the predictive power of various psychological factors leading people to accept digital contact-tracing applications (DCTAs) as a measure to manage the COVID-19 pandemic and to comply with a DCTA’s suggestions regarding safety measures. The questionnaire was given in German and translated into English for the purpose of this codebook.",
+  citation = "Albrecht, Jarecki, Meier, & Rieskamp",
+  creator =list(
+    "@type" = "Person", 
+    givenName = "Rebecca", 
+    familyName = "Albrecht",
+    email = "rebecca.albrecht@unibas.ch",
+    affiliation = list(
+      "@type" = "Organization",
+      name = "University of Basel, Switzerland"),
+    
+    "@type" = "Person",
+    givenName = "Jana B.",
+    familyName = "Jarecki",
+    email = "jj@janajarecki.com", 
+    affiliation = list(
+      "@type" = "Organization",
+      name = "University of Basel, Switzerland"),
+    
+    "@type" = "Person", 
+    givenName = "Dominik", 
+    familyName = "Meier",
+    affiliation = list(
+      "@type" = "Organization",
+      name = "University of Basel, Switzerland"),
+    
+    "@type" = "Person", 
+    givenName = "Jörg", 
+    familyName = "Rieskamp",
+    affiliation = list(
+      "@type" = "Organization",
+      name = "University of Basel, Switzerland")
+    ), # email & affiliation could be added
+  
+  spatialCoverage = "online",
+  temporalCoverage = "July 2020",
+  # measurementTechnique = "Questionnaire data of human participants",
+  # funder = "Center for Economic Psychology, University of Basel",
+  # keywords = "",
+  identifier = "",
+  datePublished = ""
+  )
+
+# Function that defines how to print the codebook, only change
+# it if you want more details to be printed
+print_options <- list(
+  detailed_variables = FALSE,
+  detailed_scales = FALSE,
+  survey_overview = TRUE,
+  missingness_report = TRUE,
+  metadata_table = TRUE,
+  metadata_json = TRUE
+    )
 ```
 
 ```{r prepare_codebook}
-if (!require(pacman)) install.packages("pacman")
-pacman::p_load(data.table, codebook, labelled, sjlabelled, dplyr)
-
-# preparation
+# Preparation
 data <- fread("../processed/data.csv")
 
 # VAR_LABEL --------------------------------------------------------------------
-var_label(data$id) <- "Participant id"
+var_label(data$id) <- "Participant identifier"
 var_label(data$startdate) <- "Date and time the participant started"
 var_label(data$enddate) <- "Date and time the participant finished"
 var_label(data$progress) <- "How far the participant progressed in the study"
@@ -34,18 +98,12 @@ var_label(data$userlanguage) <- "The language in which the participant processed
 
 # seek_risk
 var_label(data$seek_risk_general) <- "How do you rate yourself personally? Are you generally a risk-taker or do you try to avoid risks?"
-var_label(data$seek_risk_health) <- "How would you rate your risk tolerance in relation to the following areas? How about your health?"
-# I'm not too happy about the "how about"
-var_label(data$seek_risk_data) <- "How would you rate your risk tolerance in relation to the following areas? How about the disclosure of personal data?"
-var_label(data$seek_risk_econ) <- "How would you rate your risk tolerance in relation to the following areas? How about investments?"
+var_label(data$seek_risk_health) <- "How would you rate your risk tolerance in relation to the following areas? What about your health?"
+var_label(data$seek_risk_data) <- "How would you rate your risk tolerance in relation to the following areas? What about the disclosure of personal data?"
+var_label(data$seek_risk_econ) <- "How would you rate your risk tolerance in relation to the following areas? What about investments?"
 
 # svo
-var_label(data$svo_1) <- "Social value orientation according to Murphy et al. (2011)"
-var_label(data$svo_2) <- "Social value orientation according to Murphy et al. (2011)"
-var_label(data$svo_3) <- "Social value orientation according to Murphy et al. (2011)"
-var_label(data$svo_4) <- "Social value orientation according to Murphy et al. (2011)"
-var_label(data$svo_5) <- "Social value orientation according to Murphy et al. (2011)"
-var_label(data$svo_6) <- "Social value orientation according to Murphy et al. (2011)"
+var_label(data[, c("svo_1", "svo_2", "svo_3", "svo_4", "svo_5", "svo_6")]) <- "Social value orientation according to Murphy et al. (2011)"
 
 # iwah_close
 var_label(data$iwah_close_1) <- "How close do you feel to each of the following groups? - People in my community"
@@ -62,7 +120,7 @@ var_label(data$iwah_common_1) <- "How many things do you have in common with the
 var_label(data$iwah_common_2) <- "How many things do you have in common with the following groups? - Swiss people"
 var_label(data$iwah_common_3) <- "How many things do you have in common with the following groups? - People all over the world"
 
-# iwah_family -> spelling mistake, can/should this be corrected?
+# iwah_family
 var_label(data$iwah_familiy_1) <- "Sometimes people count other people as family, even if they are not actually part of their own family. How much do you count the following groups as family? - People in my community"
 var_label(data$iwah_familiy_2) <- "Sometimes people count other people as family, even if they are not actually part of their own family. How much do you count the following groups as family? - Swiss people"
 var_label(data$iwah_familiy_3) <- "Sometimes people count other people as family, even if they are not actually part of their own family. How much do you count the following groups as family? - People all over the world"
@@ -109,23 +167,23 @@ var_label(data$tech_interest_ability) <- "Do you find it easy to use a new appli
 
 # health
 var_label(data$is_infected) <- "Do you yourself or someone you are in close contact with have a confirmed infection with the new coronavirus at the moment?"
-var_label(data$was_infected) <- "Have you yourself or someone with whom you are in close contact had a confirmed infection with the new coronavirus?"
+var_label(data$was_infected) <- "Have you yourself or someone you are in close contact with had a confirmed infection with the new coronavirus?"
 
-var_label(data$has_symptoms_fever) <- "Have you had the following symptoms in the past two weeks (14 days)? - Fever"
-var_label(data$has_symptoms_feverfeel) <- "Have you had the following symptoms in the past two weeks (14 days)? - Fever sensation"
-var_label(data$has_symptoms_sorethroat) <- "Have you had the following symptoms in the past two weeks (14 days)? - Sore throat"
-var_label(data$has_symptoms_drycough) <- "Have you had the following symptoms in the past two weeks (14 days)? - Dry cough"
-var_label(data$has_symptoms_shortbreath) <- "Have you had the following symptoms in the past two weeks (14 days)? - Shortness of breath"
-var_label(data$has_symptoms_muscleache) <- "Have you had the following symptoms in the past two weeks (14 days)? - Muscle ache"
-var_label(data$has_symptoms_nosense) <- "Have you had the following symptoms in the past two weeks (14 days)? - Sudden loss of the sense of smell and/or taste"
+var_label(data$has_symptoms_fever) <- "Have you had the following symptoms in the last two weeks (14 days)? - Fever"
+var_label(data$has_symptoms_feverfeel) <- "Have you had the following symptoms in the last two weeks (14 days)? - Fever sensation"
+var_label(data$has_symptoms_sorethroat) <- "Have you had the following symptoms in the last two weeks (14 days)? - Sore throat"
+var_label(data$has_symptoms_drycough) <- "Have you had the following symptoms in the last two weeks (14 days)? - Dry cough"
+var_label(data$has_symptoms_shortbreath) <- "Have you had the following symptoms in the last two weeks (14 days)? - Shortness of breath"
+var_label(data$has_symptoms_muscleache) <- "Have you had the following symptoms in the last two weeks (14 days)? - Muscle ache"
+var_label(data$has_symptoms_nosense) <- "Have you had the following symptoms in the last two weeks (14 days)? - Sudden loss of the sense of smell and/or taste"
 
 # mental health
 var_label(data$mhealth_irritable) <- "Please think about the last month (the last 30 days). - How many times in the last month were you upset because something unexpected happened?"
-var_label(data$mhealth_control) <- "Please think about the last month (the last 30 days). - How many times in the last month did you feel that you were not able to control the important things in your life?"
+var_label(data$mhealth_control) <- "Please think about the last month (the last 30 days). - How many times in the last month have you felt like you were unable to control the important things in your life?"
 var_label(data$mhealth_nervous) <- "Please think about the last month (the last 30 days). - How many times in the last month have you felt nervous and stressed?"
 var_label(data$mhealth_cope) <- "Please think about the last month (the last 30 days). - How many times in the last month have you felt like you were not up to all of your upcoming tasks?"
 var_label(data$mhealth_anger) <- "Please think about the last month (the last 30 days). - How many times in the last month have you been angry about things you had no control over?"
-var_label(data$mhealth_difficulty) <- "Please think about the last month (the last 30 days). - How many times in the last month have you felt like so many difficulties have piled up that you could not overcome them?"
+var_label(data$mhealth_difficulty) <- "Please think about the last month (the last 30 days). - How many times in the last month have you felt as if so many difficulties had piled up that you could not overcome them?"
 
 # policy attitudes
 var_label(data$attitudes_policies) <- "The next questions refer to the measures against the spread of the new coronavirus in Switzerland. - Are the measures taken by the federal government correct?"
@@ -138,30 +196,30 @@ var_label(data$check2_correct1) <- "The next questions refer to the measures aga
 var_label(data$acc_use) <- "The following questions deal with your personal attitude towards the SwissCovid app. - Will you use the SwissCovid app? (If you already use the SwissCovid app, please select 'Agree completely')."
 var_label(data$acc_convince) <- "The following questions deal with your personal attitude towards the SwissCovid app. - Will you try to convince other people to use the SwissCovid app?"
 var_label(data$acc_important) <- "The following questions deal with your personal attitude towards the SwissCovid app. - Do you think the SwissCovid app will help contain the spread of the coronavirus?"
-var_label(data$acc_trust) <- "The following questions deal with your personal attitude towards the SwissCovid app. - Do you think the data collected by the SwissCovid app are safe?"
+var_label(data$acc_trust) <- "The following questions deal with your personal attitude towards the SwissCovid app. - Do you think the data collected by the SwissCovid app is safe?"
 
 # compliance
-var_label(data$com_isolation) <- "Please imagine that you are using the SwissCovid app. The following questions deal with your interaction with the SwissCovid app. - Would you put yourself into voluntary self-isolation if the SwissCovid app notifies you that you have been in contact with a person who has tested positive?"
-var_label(data$com_hotline) <- "Please imagine that you are using the SwissCovid app. The following questions deal with your interaction with the SwissCovid app. - Would you call the specified hotline if the SwissCovid app notifies you that you have been in contact with a person who has tested positive?"
+var_label(data$com_isolation) <- "Please imagine that you are using the SwissCovid app. The following questions deal with your interaction with the SwissCovid app. - Would you put yourself into voluntary self-isolation if the SwissCovid app notified you that you had been in contact with a person who had tested positive?"
+var_label(data$com_hotline) <- "Please imagine that you are using the SwissCovid app. The following questions deal with your interaction with the SwissCovid app. - Would you call the specified hotline if the SwissCovid app notified you that you had been in contact with a person who had tested positive?"
 var_label(data$com_report) <- "Please imagine that you are using the SwissCovid app. The following questions deal with your interaction with the SwissCovid app. - Would you enter your own infection into the SwissCovid app if you had contracted the coronavirus?"
-var_label(data$com_test) <- "Please imagine that you are using the SwissCovid app. The following questions deal with your interaction with the SwissCovid app. - Would you make an effort to get yourself tested for the new coronavirus if the SwissCovid app notified you that you had been in contact with someone who tested positive?"
+var_label(data$com_test) <- "Please imagine that you are using the SwissCovid app. The following questions deal with your interaction with the SwissCovid app. - Would you make an effort to get yourself tested for the new coronavirus if the SwissCovid app notified you that you had been in contact with someone who had tested positive?"
 
 # risk knowledge and risk perception
 var_label(data$know_infected_all_ab) <- "How many people in Switzerland have been infected with the coronavirus since the beginning of the corona crisis?"
-var_label(data$know_death_total) <- "How many people in Switzerland have died from infection with the coronavirus since the beginning of the corona crisis?"
+var_label(data$know_death_total) <- "How many people in Switzerland have died from an infection with the coronavirus since the beginning of the corona crisis?"
 
-var_label(data$perc_infected_last7) <- "Now we are no longer talking about the total number of people affected in Switzerland, but about the risk of being newly infected within a week, based on 100,000 people. How likely is a new infection in 7 days? Imagine two times 100,000 randomly selected people in Switzerland. - How many people have been newly infected with the coronavirus in the past 7 days (out of 100,000 randomly selected people in Switzerland)?"
+var_label(data$perc_infected_last7) <- "Now we are no longer talking about the total number of people affected in Switzerland, but about the risk of being newly infected within a week, based on 100,000 people. How likely is a new infection in 7 days? Please imagine two times 100,000 randomly selected people in Switzerland. - How many people have been newly infected with the coronavirus in the past 7 days (out of 100,000 randomly selected people in Switzerland)?"
 var_label(data$perc_infected_next7) <- "How many people will become newly infected with the coronavirus in the next 7 days (out of 100,000 randomly selected people in Switzerland)?"
-var_label(data$perc_moneyloss) <- "How many workers out of 100 will lose more than half their income in the next few months?"
+var_label(data$perc_moneyloss) <- "How many out of 100 workers will lose more than half their income in the next few months?"
 var_label(data$perc_data) <- "How many out of 100 users of the SwissCovid app will unintentionally publish personal data?"
 var_label(data$perc_severe) <- "How many out of 100 people infected with the coronavirus develop a severe course of the disease caused by the virus?"
 
 var_label(data$know_econ) <- "How high do you estimate the economic costs of the new coronavirus for Switzerland? (In billions of CHF. For information: the GDP of Switzerland in 2019 was CHF 699 billion.)"
-var_label(data$know_age) <- "Age is a risk factor for severe courses. At what age does the risk for a severe course increase?"
+var_label(data$know_age) <- "The following questions refer to severe courses of the disease caused by the coronavirus. - Age is a risk factor for severe courses. At what age does the risk for a severe course increase?"
 var_label(data$know_symptoms) <- "Which of the following pre-existing conditions favor a severe course of the disease caused by the virus? Please tick all the answers that apply. (1 = Gastrointestinal diseases, 2 = Diseases and therapies that weaken the immune system, 3 = Chronic respiratory diseases, 4 = High blood pressure, 5 = Diseases of the liver, 6 = Cancer, 7 = Diabetes, 8 = Cardiovascular diseases, 9 = Nervous disorders (neurological disorders), 10 = Diseases of the kidneys)"
 
 # safety behavior
-var_label(data$safety_mask) <- "In the last 7 days, how often did you wear a mouth-nose protection in situations where it would have been advisable?"
+var_label(data$safety_mask) <- "This page is about your general behavior to protect yourself from contracting the coronavirus. In the following, please make entries between 0-100%. - In the last 7 days, how often did you wear a mouth-nose protection in situations where it would have been advisable?"
 var_label(data$safety_distance) <- "In the last 7 days, how often did you keep a distance of at least 1.5 meters from other people in public life in situations where it would have been advisable to do so?"
 var_label(data$safety_hygene) <- "In the last 7 days, how often did you use a tissue or, if not available, the crook of your arm when coughing or sneezing?"
 
@@ -195,14 +253,14 @@ var_label(data$community) <- "Approximately how many inhabitants live in the pla
 var_label(data$community_1_text) <- "Approximately how many inhabitants live in the place where you live at the moment? - Text"
 var_label(data$community_cat) <- "Can you give us an approximate size? Approximately how many inhabitants live in the place where you live?"
 var_label(data$household_kids) <- "How many of the people living with you in your household are under 18?"
-var_label(data$income_num) <- "What is your monthly income, excluding any losses due to the corona crisis (after taxes, in francs)? - Selected Choice"
-var_label(data$income_num_1_text) <- "What is your monthly income, excluding any losses due to the corona crisis (after taxes, in francs)? - Text"
+var_label(data$income_num) <- "What is your monthly income, excluding any losses due to the corona crisis (after taxes, in Swiss francs)? - Selected Choice"
+var_label(data$income_num_1_text) <- "What is your monthly income, excluding any losses due to the corona crisis (after taxes, in Swiss francs)? - Text"
 var_label(data$wealth_num) <- "How high are your assets (in Swiss francs)? - Selected Choice"
 var_label(data$wealth_num_1_text) <- "How high are your assets (in Swiss francs)? - Text"
 var_label(data$had_work) <- "Were you employed (self-employed or dependent) prior to the corona crisis in 2020?"
 var_label(data$has_work) <- "Are you currently employed (self-employed or dependent)?"
-var_label(data$income_cat) <- "In which category does your monthly income fall (before taxes, in francs), excluding any losses due to the corona crisis?"
-var_label(data$wealth_cat) <- "In which category do your assets fall approximately (in francs)?"
+var_label(data$income_cat) <- "In which category does your monthly income fall (before taxes, in Swiss francs), excluding any losses due to the corona crisis?"
+var_label(data$wealth_cat) <- "In which category do your assets fall approximately (in Swiss francs)?"
 var_label(data$income_loss) <- "Do you have a lower income from your job due to the corona crisis?"
 var_label(data$homeoffice) <- "Are you working in home office at the moment?"
 
@@ -252,9 +310,8 @@ var_label(data$know_health_score) <- ""
 var_label(data$safebehavior_score) <- ""
 
 
-
 # VALUE_LABELS -----------------------------------------------------------------
-# short cuts
+# Short cuts
 risk_preference <- c("Not at all willing to take risks" = 0, 
                      "Very willing to take risks" = 10)
 
@@ -267,8 +324,8 @@ disagree_agree <- c("Disagree completely" = 1,
 notatall_very <- c("Not at all" = 1, 
                    "Only little" = 2,
                    "A bit" = 3,
-                   "Quite" = 4,
-                   "Very" = 5)
+                   "Quite a lot" = 4,
+                   "Very much" = 5)
 
 no_yes <- c("No" = 0,
             "Yes" = 1)
@@ -301,7 +358,7 @@ perc_outof100 <- c("Up to 5 out of 100" = 11,
                 "41-45 out of 100" = 19,
                 "Over 45 out of 100" = 20)
 
-# metadata
+# Meta data
 val_labels(data$finished) <- no_yes
 
 # risk_preference
@@ -333,7 +390,6 @@ val_labels(data[, c("iwah_familiy_1", "iwah_familiy_2", "iwah_familiy_3",
                     "iwah_responsibility_1", "iwah_responsibility_2", "iwah_responsibility_3",
                     "iwah_loyalty_1", "iwah_loyalty_2", "iwah_loyalty_3",
                     "iwah_help_1", "iwah_help_2", "iwah_help_3")]) <- notatall_very
-# the answer format doesn't really fit iwah_care, iwah_help, etc.
 
 # honesty-humility personality
 val_labels(data[, c("honhum_lies", "honhum_makemoney", "honhum_celebrity", 
@@ -432,8 +488,8 @@ val_labels(data$female) <- c("Male" = 0,
 
 val_labels(data$education) <- c("Compulsory school not completed" = 1,
                                 "Compulsory school completed" = 2,
-                                "Basic vocational training (Federal Certificate of Proficiency EFZ, Federal Certificate of Vocational Education and Training EBA, Commercial College, apprenticeship certificate)" = 3, 
-                                "General education (Gymnasiale Matura, Berufsmatura, Fachmatura, secondary technical school diploma, international baccalaureate)" = 4, 
+                                "Basic vocational training (federal certificate of proficiency EFZ, federal certificate of vocational education and training EBA, commercial college, apprenticeship certificate)" = 3, 
+                                "General education (high school diploma, vocational baccalaureate, specialized baccalaureate, secondary technical school diploma, international baccalaureate)" = 4, 
                                 "Higher vocational education (diploma of higher vocational school, federal certificate of proficiency, federal diploma)" = 5, 
                                 "University (FH/PH/UH Bachelor, Master, Doctorate)" = 6) # have Jana take a look
 
@@ -445,7 +501,8 @@ val_labels(data$community_cat) <- c("Small village (up to 500 inhabitants)" = 1,
                                     "Small town (up to 50,000 inhabitants)" = 3, 
                                     "City (up to 100,000 inhabitants)" = 4, 
                                     "Big city (from 100,000 inhabitants)" = 5, 
-                                    "I do not know" = 0)
+                                    "I do not know" = 0,
+                                    "Already specified in community_1_text" = NA)
 
 val_labels(data$income_num) <- c("I do not want to specify" = 0,
                                 "Specified (see income_num_1_text)" = 1)
@@ -463,7 +520,8 @@ val_labels(data$income_cat) <- c("Up to 1,000" = 1,
                                  "6,001-7,000" = 7,
                                  "7,001-8,000" = 8,
                                  "Over 8,000" = 9,
-                                 "I do not want to specify" = 0)
+                                 "I do not want to specify" = 0,
+                                 "Already specified in income_num_1_text" = NA)
 
 val_labels(data$wealth_cat) <- c("0" = 1, 
                                  "1-25,000" = 2,
@@ -473,7 +531,8 @@ val_labels(data$wealth_cat) <- c("0" = 1,
                                  "200,001-500,000" = 6,
                                  "500,001-1,000,000" = 7,
                                  "Over 1,000,000" = 8,
-                                 "I do not want to specify" = 0)
+                                 "I do not want to specify" = 0,
+                                 "Already specified in wealth_num_1_text" = NA)
 
 val_labels(data$income_loss) <- no_yes
 
@@ -488,23 +547,10 @@ val_labels(data$data_quality) <- disagree_agree
 
 ```{r codebook}
 # CODEBOOK ---------------------------------------------------------------------
-# add metadata
-metadata(data)$name <- "Risk Preferences and Risk Perception Affect the Acceptance of Digital Contact Tracing"
-metadata(data)$description <- "The questionnaire was given in German and for the purpose of this codebook translated into English." # add a longer description of the study
-metadata(data)$identifier <- ""
-metadata(data)$datePublished <- ""
-metadata(data)$citation <- ""
-metadata(data)$keywords <- ""
-metadata(data)$temporalCoverage <- "July 2020"
-metadata(data)$spatialCoverage <- "online"
+# Adding the meta data
+metadata(data) <- meta_info
 
-metadata(data)$creator <- list(
-  "@type" = "Person",givenName = "Rebecca", familyName = "Albrecht",
-  "@type" = "Person",givenName = "Jana B.", familyName = "Jarecki",
-  "@type" = "Person", givenName = "Dominik", familyName = "Meier",
-  "@type" = "Person", givenName = "Jörg", familyName = "Rieskamp")
-# email & affiliation could be added
-
+# Generating the codebook
 compact_codebook(data)
 ```
 
