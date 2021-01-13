@@ -27,7 +27,7 @@ ggplot2::theme_set(ggthemes::theme_tufte(base_family = "sans", ticks = FALSE))
 ```{r meta_info}
 # Define a list with information about the authors, affiliation, methods of data collection, and so forth (called meta information)
 meta_info <- list(
-  name = "Risk Preferences and Risk Perception Affect the Acceptance of Digital Contact Tracing",
+  name = "data.csv",
   description = "Questionnaire data used to examine the predictive power of various psychological factors leading people to accept digital contact-tracing applications (DCTAs) as a measure to manage the COVID-19 pandemic and to comply with a DCTA’s suggestions regarding safety measures. The questionnaire was given in German and translated into English for the purpose of this codebook.",
   citation = "Albrecht, Jarecki, Meier, & Rieskamp",
   creator =list(
@@ -160,7 +160,7 @@ var_label(data$honhum_special) <- "Please indicate how much you agree with the f
 var_label(data$check1_correct3) <- "Please indicate how much you agree with the following statements. - This question is used to record whether the questionnaire is being processed attentively. Please answer 'Neutral' here."
 
 # technology
-var_label(data$tech_general) <- "The next questions are about how you deal with new technologies and smartphones. Do you try out new technical things in general?"
+var_label(data$tech_general) <- "Do you try out new technical things in general?"
 var_label(data$has_smartphone) <- "Do you own a smartphone?"
 var_label(data$tech_interest_apps) <- "Do you install new applications/apps on your smartphone?"
 var_label(data$tech_interest_ability) <- "Do you find it easy to use a new application/app for your smartphone?"
@@ -205,8 +205,8 @@ var_label(data$com_report) <- "Please imagine that you are using the SwissCovid 
 var_label(data$com_test) <- "Please imagine that you are using the SwissCovid app. The following questions deal with your interaction with the SwissCovid app. - Would you make an effort to get yourself tested for the new coronavirus if the SwissCovid app notified you that you had been in contact with someone who had tested positive?"
 
 # risk knowledge and risk perception
-var_label(data$know_infected_all_ab) <- "How many people in Switzerland have been infected with the coronavirus since the beginning of the corona crisis?"
-var_label(data$know_death_total) <- "How many people in Switzerland have died from an infection with the coronavirus since the beginning of the corona crisis?"
+var_label(data$raw_know_infected_all_ab) <- "How many people in Switzerland have been infected with the coronavirus since the beginning of the corona crisis?"
+var_label(data$raw_know_death_total) <- "How many people in Switzerland have died from an infection with the coronavirus since the beginning of the corona crisis?"
 
 var_label(data$perc_infected_last7) <- "Now we are no longer talking about the total number of people affected in Switzerland, but about the risk of being newly infected within a week, based on 100,000 people. How likely is a new infection in 7 days? Please imagine two times 100,000 randomly selected people in Switzerland. - How many people have been newly infected with the coronavirus in the past 7 days (out of 100,000 randomly selected people in Switzerland)?"
 var_label(data$perc_infected_next7) <- "How many people will become newly infected with the coronavirus in the next 7 days (out of 100,000 randomly selected people in Switzerland)?"
@@ -215,11 +215,11 @@ var_label(data$perc_data) <- "How many out of 100 users of the SwissCovid app wi
 var_label(data$perc_severe) <- "How many out of 100 people infected with the coronavirus develop a severe course of the disease caused by the virus?"
 
 var_label(data$know_econ) <- "How high do you estimate the economic costs of the new coronavirus for Switzerland? (In billions of CHF. For information: the GDP of Switzerland in 2019 was CHF 699 billion.)"
-var_label(data$know_age) <- "The following questions refer to severe courses of the disease caused by the coronavirus. - Age is a risk factor for severe courses. At what age does the risk for a severe course increase?"
+var_label(data$raw_know_age) <- "Age is a risk factor for severe courses. At what age does the risk for a severe course increase?"
 var_label(data$know_symptoms) <- "Which of the following pre-existing conditions favor a severe course of the disease caused by the virus? Please tick all the answers that apply. (1 = Gastrointestinal diseases, 2 = Diseases and therapies that weaken the immune system, 3 = Chronic respiratory diseases, 4 = High blood pressure, 5 = Diseases of the liver, 6 = Cancer, 7 = Diabetes, 8 = Cardiovascular diseases, 9 = Nervous disorders (neurological disorders), 10 = Diseases of the kidneys)"
 
 # safety behavior
-var_label(data$safety_mask) <- "This page is about your general behavior to protect yourself from contracting the coronavirus. In the following, please make entries between 0-100%. - In the last 7 days, how often did you wear a mouth-nose protection in situations where it would have been advisable?"
+var_label(data$safety_mask) <- "In the last 7 days, how often did you wear a mouth-nose protection in situations where it would have been advisable?"
 var_label(data$safety_distance) <- "In the last 7 days, how often did you keep a distance of at least 1.5 meters from other people in public life in situations where it would have been advisable to do so?"
 var_label(data$safety_hygene) <- "In the last 7 days, how often did you use a tissue or, if not available, the crook of your arm when coughing or sneezing?"
 
@@ -280,9 +280,9 @@ var_label(data$income_imputed) <- ""
 var_label(data$wealth_imputed) <- ""
 
 var_label(data$know_symptoms_perc) <- ""
-var_label(data$raw_know_age) <- ""
-var_label(data$raw_know_infected_all_ab) <- ""
-var_label(data$raw_know_death_total) <- ""
+var_label(data$know_age) <- ""
+var_label(data$know_infected_all_ab) <- ""
+var_label(data$know_death_total) <- ""
 
 var_label(data$accept_index) <- ""
 var_label(data$comply_index) <- ""
@@ -418,28 +418,28 @@ val_labels(data[, c("acc_use", "acc_convince", "acc_important", "acc_trust")]) <
 val_labels(data[, c("com_isolation", "com_hotline", "com_report", "com_test")]) <- disagree_agree
 
 # risk knowledge & risk perception
-val_labels(data$know_infected_all_ab) <- c("Up to 5,000" = 2500, 
-                                           "5,001-10,000" = 7500,
-                                           "10,001-15,000" = 12500,
-                                           "15,001-20,000" = 17500, 
-                                           "20,001-25,000" = 22500,
-                                           "25,001-30,000" = 27500,
-                                           "30,001-35,000" = 32500,
-                                           "35,001-40,000" = 37500,
-                                           "40,001-45,000" = 42500,
-                                           "45,001-50,000" = 47500,
-                                           "Over 50,000" = 47501)
+val_labels(data$raw_know_infected_all_ab) <- c("Up to 5,000" = 2500, 
+                                               "5,001-10,000" = 7500,
+                                               "10,001-15,000" = 12500,
+                                               "15,001-20,000" = 17500, 
+                                               "20,001-25,000" = 22500,
+                                               "25,001-30,000" = 27500,
+                                               "30,001-35,000" = 32500,
+                                               "35,001-40,000" = 37500,
+                                               "40,001-45,000" = 42500,
+                                               "45,001-50,000" = 47500,
+                                               "Over 50,000" = 47501)
 
-val_labels(data$know_death_total) <- c("Up to 500" = 250, 
-                                       "501-1,000" = 750,
-                                       "1,001-1,500" = 1250,
-                                       "1,501-2,000" = 1750, 
-                                       "2,001-2,500" = 2250,
-                                       "2,501-3,000" = 2750,
-                                       "3,001-3,500" = 3250,
-                                       "3,501-4,000" = 3750,
-                                       "4,001-4,500" = 4250,
-                                       "Over 4,500" = 4500)
+val_labels(data$raw_know_death_total) <- c("Up to 500" = 250, 
+                                           "501-1,000" = 750,
+                                           "1,001-1,500" = 1250,
+                                           "1,501-2,000" = 1750, 
+                                           "2,001-2,500" = 2250,
+                                           "2,501-3,000" = 2750,
+                                           "3,001-3,500" = 3250,
+                                           "3,501-4,000" = 3750,
+                                           "4,001-4,500" = 4250,
+                                           "Over 4,500" = 4500)
 
 val_labels(data[, c("perc_infected_last7", "perc_infected_next7")]) <- perc_outof100000
 
