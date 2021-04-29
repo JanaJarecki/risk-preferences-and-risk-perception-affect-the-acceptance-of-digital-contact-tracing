@@ -56,7 +56,7 @@ bfs[, BF := ifelse(BF > 100, ">100", ifelse(BF < 1/100, "<1/100", ifelse(BF < 10
 
 # Plot IVs --------------------------------------------------------------------
 risk_perc <- plot_group(vars = "perc", title = "Risk Perceptions")
-risk_seek <- plot_group(vars = "seek", title = "Risk-Seeking Preferences")
+risk_seek <- plot_group(vars = "seek", title = "Risk Preferences")
 other     <- plot_group(vars = paste(gsub("b_", "", grep("per|see|Inter|lp|sigma|prior", parnames(fit_reduced_no_social),invert=TRUE, value=TRUE)), collapse="|"),
   title = "Major Predictors")
 
@@ -70,10 +70,10 @@ plot_lines <- function(var, xlab, ylab = NULL, title) {
   }
   return(p + ggtitle(title))
 }
-health_perc <- plot_lines("perc_risk_health", "Health Risk Perception", "\n\nAcceptance of\nContact Tracing", "Health Risk Effects")
-health_seek <- plot_lines("seek_risk_health", "Health Risk Seeking", NULL, "")
-data_perc <- plot_lines("perc_risk_data", "Data Risk Perception", "\n\nAcceptance of\nContact Tracing", "\nData Risk Effects")
-data_seek <- plot_lines("seek_risk_data", "Data Risk Seeking", NULL, "\n")
+health_perc <- plot_lines("perc_risk_health", "Health-risk Perception", "\n\nAcceptance of\nContact Tracing", "Health-risk Effects")
+health_seek <- plot_lines("seek_risk_health", "Health-risk Tolerance", NULL, "")
+data_perc <- plot_lines("perc_risk_data", "Data-risk Perception", "\n\nAcceptance of\nContact Tracing", "\nData-risk Effects")
+data_seek <- plot_lines("seek_risk_data", "Data-risk Tolerance", NULL, "\n")
 
 lines  <- health_perc + (health_seek + plot_layout(tag_level="new")) + (data_perc + plot_layout(tag_level="new")) + (data_seek + plot_layout(tag_level="new")) +plot_layout(nrow=2) &
   theme(

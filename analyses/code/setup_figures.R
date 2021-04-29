@@ -2,7 +2,7 @@
 # Setup for all figures
 # Author: Jana B. Jarecki
 # ==========================================================================
-pacman::p_load(ggplot2, patchwork, ggsci)
+pacman::p_load(ggplot2, patchwork, ggsci, tidybayes, bayesplot)
 pacman::p_load_gh("janajarecki/themejj")
 theme_set(themejj(base_size = 14))
 
