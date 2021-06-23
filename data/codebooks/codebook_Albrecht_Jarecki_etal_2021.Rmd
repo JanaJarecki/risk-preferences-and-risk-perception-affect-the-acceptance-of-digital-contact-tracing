@@ -1,6 +1,6 @@
 ---
 title: "Codebook for data in Albrecht, Jarecki, Meier, and Rieskamp"
-author: "Elina Lutz"
+author: "Albrecht, Jarecki, Meier, & Rieskamp"
 date: "`r Sys.Date()`"
 output: html_document
 ---
@@ -29,7 +29,7 @@ ggplot2::theme_set(ggthemes::theme_tufte(base_family = "sans", ticks = FALSE))
 meta_info <- list(
   name = "data.csv",
   description = "Questionnaire data used to examine the predictive power of various psychological factors leading people to accept digital contact-tracing applications (DCTAs) as a measure to manage the COVID-19 pandemic and to comply with a DCTA’s suggestions regarding safety measures. The questionnaire was given in German and translated into English for the purpose of this codebook.",
-  citation = "Albrecht, Jarecki, Meier, & Rieskamp",
+  citation = "Albrecht, R., Jarecki, J. B., Meier, D., & Rieskamp, J. (in press). Risk Preferences and Risk Perception Affect the Acceptance of Digital Contact Tracing. *journal*, *volume*(issue), page range. DOI",
   creator =list(
     "@type" = "Person", 
     givenName = "Rebecca", 
@@ -50,15 +50,15 @@ meta_info <- list(
     "@type" = "Person", 
     givenName = "Dominik", 
     familyName = "Meier",
-    # email = "",
+    email = "dominik.meier@unibas.ch",
     affiliation = list(
       "@type" = "Organization",
       name = "University of Basel, Switzerland"),
     
     "@type" = "Person", 
-    givenName = "Jörg", 
+    givenName = "Joerg", 
     familyName = "Rieskamp",
-    # email = "",
+    email = "joerg.rieskamp@unibas.ch",
     affiliation = list(
       "@type" = "Organization",
       name = "University of Basel, Switzerland")
@@ -159,7 +159,7 @@ var_label(data$honhum_celebrity) <- "Please indicate how much you agree with the
 var_label(data$honhum_special) <- "Please indicate how much you agree with the following statements. - I deserve special treatment."
 
 # check1
-var_label(data$check1_correct3) <- "Please indicate how much you agree with the following statements. - This question is used to record whether the questionnaire is being processed attentively. Please answer 'Neutral' here."
+var_label(data$check1_correct3) <- "This question is used to record whether the questionnaire is being processed attentively. Please answer 'Neutral' here."
 
 # technology
 var_label(data$tech_general) <- "Do you try out new technical things in general?"
@@ -241,10 +241,10 @@ var_label(data$raw_belief_global) <- "Is the new coronavirus a problem for the w
 var_label(data$check3_correct5) <- "This question is used to record whether the questionnaire is being processed attentively. Please answer 'Agree completely' here."
 
 # understanding the app
-var_label(data$comprehension_data) <- "Which of the following statements are correct about the functionality of the SwissCovid app? - When using the SwissCovid app, all data is stored anonymously."
-var_label(data$comprehension_self) <- "Which of the following statements are correct about the functionality of the SwissCovid app? - When I use the SwissCovid app, this helps me stay healthy."
-var_label(data$comprehension_other) <- "Which of the following statements are correct about the functionality of the SwissCovid app? - When I use the SwissCovid app, I help other people stay healthy."
-var_label(data$comprehension_severe) <- "Which of the following statements are correct about the functionality of the SwissCovid app? - When I use the SwissCovid app, I help people from risk groups stay healthy."
+var_label(data$comprehension_data) <- "When using the SwissCovid app, all data is stored anonymously."
+var_label(data$comprehension_self) <- "When I use the SwissCovid app, this helps me stay healthy."
+var_label(data$comprehension_other) <- "When I use the SwissCovid app, I help other people stay healthy."
+var_label(data$comprehension_severe) <- "When I use the SwissCovid app, I help people from risk groups stay healthy."
 
 # demographics
 var_label(data$age) <- "How old are you?"
@@ -268,49 +268,6 @@ var_label(data$homeoffice) <- "Are you currently working in home office?"
 
 # data quality
 var_label(data$data_quality) <- "Did you fill out the questionnaire in a concentrated way so that we can use your data?"
-
-# other variables
-var_label(data$sc0) <- ""
-var_label(data$u) <- ""
-var_label(data$c) <- ""
-
-var_label(data$perc_risk_severe) <- ""
-var_label(data$perc_risk_data) <- ""
-var_label(data$perc_risk_econ) <- ""
-
-var_label(data$community_imputed) <- ""
-var_label(data$income_imputed) <- ""
-var_label(data$wealth_imputed) <- ""
-
-var_label(data$know_symptoms_perc) <- ""
-var_label(data$know_age) <- ""
-var_label(data$know_infected_all_ab) <- ""
-var_label(data$know_death_total) <- ""
-
-var_label(data$accept_index) <- ""
-var_label(data$comply_index) <- ""
-var_label(data$vaccine_index) <- ""
-
-var_label(data$honhum_score) <- ""
-var_label(data$perc_risk_health) <- ""
-
-var_label(data$iwah_community) <- ""
-var_label(data$iwah_swiss) <- ""
-var_label(data$iwah_world) <- ""
-var_label(data$iwah_diff_score) <- ""
-
-var_label(data$svo_angle) <- ""
-var_label(data$policy_score) <- ""
-var_label(data$mhealth_score) <- ""
-var_label(data$tech_score) <- ""
-var_label(data$compreh_score) <- ""
-var_label(data$has_symptoms) <- ""
-var_label(data$know_health_score) <- ""
-var_label(data$safebehavior_score) <- ""
-
-var_label(data$belief_efficiency) <- ""
-var_label(data$belief_local) <- ""
-var_label(data$belief_global) <- ""
 
 
 # VALUE LABELS -----------------------------------------------------------------
@@ -499,10 +456,10 @@ val_labels(data$female) <- c("Male" = 0,
 
 val_labels(data$education) <- c("Compulsory school not completed" = 1,
                                 "Compulsory school completed" = 2,
-                                "Basic vocational training (federal certificate of proficiency EFZ, federal certificate of vocational education and training EBA, commercial college, certificate of apprenticeship)" = 3, 
-                                "General education (high school diploma, vocational baccalaureate, specialized baccalaureate, secondary technical school diploma, international baccalaureate)" = 4, 
-                                "Higher vocational education (diploma of higher vocational school, federal certificate of proficiency, federal diploma)" = 5, 
-                                "University (FH/PH/UH Bachelor, Master, Doctorate)" = 6)
+                                "Basic vocational training (federal certificates of proficiency EFZ [eidg. Fähigkeitszeugnisse EFZ], federal certificate of vocational education and training EBA [eidg. Berufsattest EBA], commercial college [Handelsmittelschule], certificate of apprenticeship [Anlehrausweis])" = 3, 
+                                "General education (high school diploma [gymnasiale Maturität], vocational baccalaureate [Berufsmaturität], specialized baccalaureate [Fachmaturität], specialized secondary school diploma [Fachmittelschulabschluss], international baccalaureate [internationales Baccalaureat])" = 4, 
+                                "Higher vocational education (diploma of higher vocational school [Diplom höhere Fachschule], federal certificate of proficiency [eidg. Fachausweis], federal diploma [eidg. Diplom])" = 5, 
+                                "Higher education institution (university of applied sciences [FH]/university of education [PH]/university [UH] Bachelor's degree, Master's degree, Doctorate)" = 6)
 
 val_labels(data$community) <- c("Specified (see community_1_text)" = 1,
                                 "I do not know" = 2)
