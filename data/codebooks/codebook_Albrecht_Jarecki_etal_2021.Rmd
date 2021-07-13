@@ -29,7 +29,7 @@ ggplot2::theme_set(ggthemes::theme_tufte(base_family = "sans", ticks = FALSE))
 meta_info <- list(
   name = "data.csv",
   description = "Questionnaire data used to examine the predictive power of various psychological factors leading people to accept digital contact-tracing applications (DCTAs) as a measure to manage the COVID-19 pandemic and to comply with a DCTA’s suggestions regarding safety measures. The questionnaire was given in German and translated into English for the purpose of this codebook.",
-  citation = "Albrecht, R., Jarecki, J. B., Meier, D., & Rieskamp, J. (in press). Risk Preferences and Risk Perception Affect the Acceptance of Digital Contact Tracing. *journal*, *volume*(issue), page range. DOI",
+  citation = "Albrecht, R., Jarecki, J. B., Meier, D., & Rieskamp, J. (in press). Risk preferences and risk perception affect the acceptance of digital contact tracing. [Data set]. *journal*, *volume*(issue), page range. doi",
   creator =list(
     "@type" = "Person", 
     givenName = "Rebecca", 
@@ -56,7 +56,7 @@ meta_info <- list(
       name = "University of Basel, Switzerland"),
     
     "@type" = "Person", 
-    givenName = "Joerg", 
+    givenName = "Jörg", 
     familyName = "Rieskamp",
     email = "joerg.rieskamp@unibas.ch",
     affiliation = list(
