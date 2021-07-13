@@ -1,6 +1,8 @@
 # ==========================================================================
 # Preprocessing of the main BCRQ study
-# Do not run this script
+# Skip this script - do not run this script
+# To run it you would need access to the raw data
+# But we only provide the processed data online
 # ==========================================================================
 
 

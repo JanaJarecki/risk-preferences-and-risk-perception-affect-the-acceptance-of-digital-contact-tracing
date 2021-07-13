@@ -24,10 +24,10 @@ plot_it <- function(xstring, xtitle) {
     stat_summary(geom = "crossbar", width = .9, fatten=1.3, color="white", fun.data = function(x){c(y=median(x), ymin=median(x), ymax=median(x))}) +
     facet_wrap(~factor(variable, levels = to_plot, label = labels), nrow=1, scales = "free_y") +
     guides(fill="none") +
-    scale_x_discrete(expand = c(0,0), limits = factor(c(1,3))) +
+    scale_x_discrete(expand = c(0,0)) +
     theme(
-      aspect.ratio = .8,
-      axis.text.x = element_text(angle = 65, vjust = 1, hjust = .95),
+      #aspect.ratio = .8,
+      axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1),
       axis.ticks.x = element_blank(),
       plot.margin = margin(c(0,0,0,0), unit = "lines")) +
     xlab(xtitle) +
@@ -35,13 +35,13 @@ plot_it <- function(xstring, xtitle) {
 
   p2 <- ggplot(d[!is.na(get(xstring)), .N, by = xstring], aes_string(x = xstring, y = "N")) +
     geom_bar(stat = "identity", fill = "grey80", color = NA, width = .5, position = position_dodge(width=0.6)) +
-    scale_x_discrete(name = "", expand = c(.2,0)) +
+    scale_x_discrete(name = "", expand = c(.4,0)) +
     scale_y_continuous(expand = c(0,0)) +
     theme(
       aspect.ratio = .8,
-      axis.text.x = element_text(angle = 65, vjust = 1, hjust = .95),
+      axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1),
       axis.ticks.x = element_blank(),
-      plot.margin = margin(c(b=1,0,0,0), unit = "lines"))
+      plot.margin = margin(c(b=1.3,0,0,0), unit = "lines"))
   (p1 | p2) 
 }
 
@@ -53,4 +53,4 @@ plot_layout(nrow = 2) +
 plot_annotation(tag_levels = c("A", "1")) &
 theme(plot.margin = margin(0.2, unit = "lines"))
 
-ggsave("../figures/fig_descriptive.pdf", w = 9, h = 4, scale = 1.5)
+ggsave("../figures/fig_descriptive.pdf", w = 9.5, h = 3.5, scale = 1.4)

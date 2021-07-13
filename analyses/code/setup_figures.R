@@ -26,8 +26,8 @@ color_schemes <- list(
 
 # Define labels for the predictors for all plots --------------------------
 variable_labels <- c(
-  perc_risk_health = "Health Risk Perception",
-  perc_risk_data = "Data-Security Risk Perception",
+  perc_risk_health = "Health-risk Perception",
+  perc_risk_data = "Data-security Risk Perception",
   perc_risk_econ = "Economic Risk Perception",
   seek_risk_general = "General Risk Seeking",
   seek_risk_health = "Health Risk Seeking",
