@@ -3,3 +3,6 @@ consentforms/
 
 # ignore too large variable selection
 *_variable_selection*.rds
+.Rproj.user
+
+BCRQ-basel-covid-risk-questionnaire.Rproj
